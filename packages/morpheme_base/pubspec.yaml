@@ -1,0 +1,22 @@
+name: morpheme_base
+description: MorphemeBase is base for UI project include state management with cubit & hydrated.
+version: 1.0.0
+homepage: https://ui.morpheme.design/
+repository: https://github.com/morphemedesign/morpheme-flutter-library/tree/main/packages/morpheme_base
+
+environment:
+  sdk: ">=2.17.0 <4.0.0"
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  flutter_bloc: ^8.1.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+
+flutter:

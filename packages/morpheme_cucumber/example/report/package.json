@@ -1,0 +1,12 @@
+{
+  "name": "report",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "main": "index.js",
+  "author": "Morpheme Indonesia",
+  "license": "ISC",
+  "devDependencies": {
+    "cucumber-html-reporter": "^5.5.1"
+  }
+}

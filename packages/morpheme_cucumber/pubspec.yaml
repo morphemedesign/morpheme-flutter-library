@@ -1,0 +1,24 @@
+name: morpheme_cucumber
+description: A gherkin / cucumber integration test runner flutter with morpheme_cli.
+version: 1.0.1
+homepage: https://ui.morpheme.design/
+repository: https://github.com/morphemedesign/morpheme-flutter-library/tree/main/packages/morpheme_cucumber
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  integration_test:
+    sdk: flutter
+  flutter_test:
+    sdk: flutter
+  flutter:
+    sdk: flutter
+
+  collection: ^1.18.0
+  equatable: ^2.0.5
+  patrol: ^3.5.0
+  patrol_finders: ^2.0.1+1
+
+dev_dependencies:
+  flutter_lints: ^3.0.1
