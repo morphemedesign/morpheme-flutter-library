@@ -343,7 +343,7 @@ class _MorphemeCachedNetworkImageState
   Object? error;
 
   void cachedOrAsync() async {
-    setState(() => isLoading = true);
+    if (mounted) setState(() => isLoading = true);
     await MorphemeCachedNetworkImageManager().cachedOrAsync(
       widget.imageUrl,
       (image, error) {
@@ -355,7 +355,7 @@ class _MorphemeCachedNetworkImageState
         }
       },
     );
-    setState(() => isLoading = false);
+    if (mounted) setState(() => isLoading = false);
   }
 
   @override
