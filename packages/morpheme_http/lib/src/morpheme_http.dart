@@ -3,17 +3,20 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart';
+import 'package:logger/logger.dart';
 import 'package:morpheme_http/src/utils/auth_token_option.dart';
 import 'package:morpheme_http/src/utils/middleware_response_option.dart';
 import 'package:morpheme_http/src/utils/refresh_token_option.dart';
 import 'package:morpheme_inspector/morpheme_inspector.dart'
     show MorphemeInspector, Inspector, RequestInspector, ResponseInspector;
-import 'package:http/http.dart';
-import 'package:logger/logger.dart';
 import 'package:uuid/uuid.dart';
 
 import 'cache_strategy/cache_strategy.dart';
 import 'errors/morpheme_exceptions.dart' as morpheme_exception;
+
+typedef CallbackProgressHttp = void Function(
+    int received, int totalContentLength);
 
 /// The base class for an HTTP client.
 class MorphemeHttp {
@@ -482,6 +485,112 @@ class MorphemeHttp {
       ..headers.addAll(request.headers);
 
     return requestCopy;
+  }
+
+  Future<Response> download(
+    Uri url, {
+    Map<String, String>? headers,
+    Map<String, dynamic>? body,
+    CallbackProgressHttp? onProgress,
+  }) async {
+    Map<String, String>? queryParameters = body?.map(
+      (key, value) => MapEntry(key, value.toString()),
+    );
+    final urlWithBody = queryParameters?.isNotEmpty ?? false
+        ? url.replace(queryParameters: queryParameters)
+        : url;
+
+    return _sendStreamed(
+      'GET',
+      urlWithBody,
+      headers,
+      onProgress: onProgress,
+    );
+  }
+
+  /// Sends a non-streaming [Request] and returns a non-streaming [Response],
+  /// include put new headers and handle refresh token.
+  Future<Response> _sendStreamed(
+    String method,
+    Uri url,
+    Map<String, String>? headers, {
+    Object? body,
+    Encoding? encoding,
+    CallbackProgressHttp? onProgress,
+  }) async {
+    try {
+      final newHeaders = await _putIfAbsentHeader(url, headers);
+      final request = _getRequest(method, url, newHeaders, body, encoding);
+
+      final response = await _fetchDownload(request, body, onProgress);
+
+      if (_middlewareResponseOption?.condition(request, response) ?? false) {
+        await _middlewareResponseOption?.onResponse(response);
+      }
+
+      _handleErrorResponse(response);
+
+      await _authTokenOption?.handleConditionAuthTokenOption(request, response);
+      return response;
+    } on SocketException {
+      throw morpheme_exception.NoInternetException();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Sends a non-streaming [Request] and returns a non-streaming [Response].
+  Future<Response> _fetchDownload(BaseRequest request, Object? body,
+      CallbackProgressHttp? onProgress) async {
+    final uuid = const Uuid().v4();
+    _loggerRequest(request, body);
+    await _inspectorRequest(uuid, request, body);
+    final streamResponse = await request.send();
+    final contentLength = streamResponse.contentLength ?? 0;
+    int received = 0;
+
+    onProgress?.call(received, contentLength);
+
+    List<int> bytes = [];
+    final completer = Completer();
+    late Response response;
+    streamResponse.stream.listen(
+      (value) {
+        bytes.addAll(value);
+        received += value.length;
+        onProgress?.call(received, contentLength);
+      },
+      onError: (e) {
+        response = Response.bytes(
+          bytes,
+          streamResponse.statusCode,
+          request: streamResponse.request,
+          headers: streamResponse.headers,
+          isRedirect: streamResponse.isRedirect,
+          persistentConnection: streamResponse.persistentConnection,
+          reasonPhrase: streamResponse.reasonPhrase,
+        );
+        completer.complete();
+      },
+      onDone: () {
+        response = Response.bytes(
+          bytes,
+          streamResponse.statusCode,
+          request: streamResponse.request,
+          headers: streamResponse.headers,
+          isRedirect: streamResponse.isRedirect,
+          persistentConnection: streamResponse.persistentConnection,
+          reasonPhrase: streamResponse.reasonPhrase,
+        );
+        completer.complete();
+      },
+    );
+
+    await completer.future;
+
+    _loggerResponse(response);
+    _inspectorResponse(uuid, response);
+    return response;
   }
 
   /// Throws a [MorphemeException] if [response] is not successfull.

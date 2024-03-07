@@ -50,7 +50,7 @@ final class AuthTokenOption {
   final OnClearToken? onClearToken;
 
   /// Exclude endpoint to usage authorization
-  final List<Uri>? excludeEndpointUsageToken;
+  final List<RegExp>? excludeEndpointUsageToken;
 }
 
 /// Extension for handling advantage [AuthTokenOption]
@@ -61,7 +61,7 @@ extension AuthTokenOptionExtension on AuthTokenOption {
   ///
   Future<MapEntry?> getMapEntryToken(Uri url) async {
     if (excludeEndpointUsageToken
-            ?.where((element) => element.path == url.path)
+            ?.where((element) => element.hasMatch(url.path))
             .isNotEmpty ??
         true) {
       return null;
