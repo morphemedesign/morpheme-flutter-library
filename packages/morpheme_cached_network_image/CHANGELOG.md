@@ -1,3 +1,7 @@
+## 1.0.3
+
+- bump http to 1.2.1
+
 ## 1.0.2
 
 - fix bad state after widget dispose
