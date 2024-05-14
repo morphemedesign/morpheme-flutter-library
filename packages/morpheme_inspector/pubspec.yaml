@@ -1,6 +1,6 @@
 name: morpheme_inspector
 description: A simple in-app for MorphemeHttp inspector. Intercepts and persists all HTTP requests and responses inside your application, and provides a UI for inspecting their content.
-version: 1.1.0
+version: 1.2.0
 homepage: https://morpheme.design/
 repository: https://github.com/morphemedesign/morpheme-flutter-library/tree/main/packages/morpheme_inspector
 
@@ -12,7 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  intl: ^0.18.1
+  intl: ^0.19.0
   sqflite: ^2.3.3+1
   sensors_plus: ^5.0.1
   flutter_local_notifications: ^17.1.2

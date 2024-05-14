@@ -1,3 +1,7 @@
+## 1.2.0
+
+- bump intl to 0.19.0
+
 ## 1.1.0
 
 - bump sqflite to 2.3.3+1
