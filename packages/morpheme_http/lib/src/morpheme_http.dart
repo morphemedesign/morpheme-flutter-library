@@ -398,11 +398,12 @@ class MorphemeHttp {
   /// Return [MultipartRequest] with given [url], [files], [headers], and [body].
   Future<MultipartRequest> _getMultiPartRequest(
     Uri url, {
+    required method,
     Map<String, File>? files,
     Map<String, String>? headers,
     Map<String, String>? body,
   }) async {
-    var request = MultipartRequest('POST', url);
+    var request = MultipartRequest(method, url);
     final keys = files?.keys ?? [];
     for (var key in keys) {
       final multipartFile =
@@ -439,7 +440,46 @@ class MorphemeHttp {
       final newHeaders = await _putIfAbsentHeader(url, headers);
 
       final request = await _getMultiPartRequest(url,
-          files: files, headers: newHeaders, body: body);
+          method: 'POST', files: files, headers: newHeaders, body: body);
+      Response response = await _fetch(request, body);
+
+      // do refresh token if condition is true
+      if (_refreshTokenOption?.condition(request, response) ?? false) {
+        response = await _doRefreshTokenThenRetry(request, response, body);
+      }
+
+      if (_middlewareResponseOption?.condition(request, response) ?? false) {
+        await _middlewareResponseOption?.onResponse(response);
+      }
+
+      _handleErrorResponse(response);
+      return response;
+    } on SocketException {
+      throw morpheme_exception.NoInternetException();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Sends an HTTP PATCH multipart request with the given headers, files and body to the given
+  /// URL.
+  ///
+  /// [files] sets the files of the multipart request. It a [Map<String, File>].
+  ///
+  /// [headers] sets the headers of the multipart request. It a [Map<String, String>].
+  ///
+  /// [body] sets the body of the multipart request. It a [Map<String, String>].
+  Future<Response> patchMultipart(
+    Uri url, {
+    Map<String, File>? files,
+    Map<String, String>? headers,
+    Map<String, String>? body,
+  }) async {
+    try {
+      final newHeaders = await _putIfAbsentHeader(url, headers);
+
+      final request = await _getMultiPartRequest(url,
+          method: 'PATCH', files: files, headers: newHeaders, body: body);
       Response response = await _fetch(request, body);
 
       // do refresh token if condition is true
