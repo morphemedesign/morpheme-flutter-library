@@ -1,6 +1,6 @@
 name: morpheme_cucumber
 description: A gherkin / cucumber integration test runner flutter with morpheme_cli.
-version: 1.0.2
+version: 1.0.3
 homepage: https://morpheme.design/
 repository: https://github.com/morphemedesign/morpheme-flutter-library/tree/main/packages/morpheme_cucumber
 
@@ -17,8 +17,8 @@ dependencies:
 
   collection: ^1.18.0
   equatable: ^2.0.5
-  patrol: ^3.5.0
-  patrol_finders: ^2.0.1+1
+  patrol: ^3.6.1
+  patrol_finders: ^2.0.2
 
 dev_dependencies:
   flutter_lints: ^3.0.1

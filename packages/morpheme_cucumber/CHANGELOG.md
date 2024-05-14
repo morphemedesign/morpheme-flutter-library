@@ -1,3 +1,8 @@
+## 1.0.3
+
+- bump patrol to 3.6.1
+- bump patrol_finders to 2.0.2
+
 ## 1.0.2
 
 - update documentation and homepage link.
