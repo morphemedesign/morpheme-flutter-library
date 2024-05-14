@@ -1,3 +1,7 @@
+## 1.2.0
+
+- add fetch patchMultipart
+
 ## 1.1.0
 
 - add fetch download with progress
