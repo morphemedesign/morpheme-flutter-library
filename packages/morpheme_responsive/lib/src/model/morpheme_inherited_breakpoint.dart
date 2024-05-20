@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:morpheme_responsive/src/morpheme_breakpoint.dart';
-import 'package:morpheme_responsive/src/morpheme_responsive_target.dart';
+import 'package:morpheme_responsive/src/model/morpheme_breakpoint.dart';
+import 'package:morpheme_responsive/src/model/morpheme_responsive_target.dart';
 
 /// The `MorphemeInheritedBreakpoints` class is an immutable inherited widget that provides
 /// `MorphemeBreakpointsData` to its descendants.
@@ -86,16 +86,19 @@ class MorphemeBreakpointsData {
   /// Returns:
   ///   The function `responsiveValue` returns a double value.
   double responsiveValue({
-    required double mobile,
-    double? tablet,
-    double? desktop,
+    required double Function(Orientation orientation) mobile,
+    double Function(Orientation orientation)? tablet,
+    double Function(Orientation orientation)? desktop,
   }) {
-    if (isTablet()) {
-      return tablet ?? mobile;
-    } else if (isDesktop()) {
-      return desktop ?? mobile;
+    if (isDesktop()) {
+      return desktop?.call(orientation) ??
+          tablet?.call(orientation) ??
+          mobile.call(orientation);
+    } else if (isTablet()) {
+      return tablet?.call(orientation) ?? mobile.call(orientation);
     }
-    return mobile;
+
+    return mobile.call(orientation);
   }
 
   @override

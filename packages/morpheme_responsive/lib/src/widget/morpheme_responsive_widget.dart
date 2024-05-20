@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:morpheme_responsive/src/morpheme_responsive.dart';
+import 'package:morpheme_responsive/src/widget/morpheme_responsive.dart';
 
 typedef BuilderResposive = Widget Function(
   BuildContext context,

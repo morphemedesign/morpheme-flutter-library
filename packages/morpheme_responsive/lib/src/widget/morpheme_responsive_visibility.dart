@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:morpheme_responsive/src/morpheme_responsive.dart';
+import 'package:morpheme_responsive/src/widget/morpheme_responsive.dart';
 
 /// The `MorphemeResponsiveVisibility` class is a widget that conditionally shows or hides its child based
 /// on the device's screen size.

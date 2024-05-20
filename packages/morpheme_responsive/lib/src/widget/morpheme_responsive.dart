@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:morpheme_responsive/src/morpheme_breakpoint.dart';
-import 'package:morpheme_responsive/src/morpheme_inherited_breakpoint.dart';
+import 'package:morpheme_responsive/src/model/morpheme_breakpoint.dart';
+import 'package:morpheme_responsive/src/model/morpheme_inherited_breakpoint.dart';
 
 /// The `MorphemeResponsive` class is a widget that provides responsive design capabilities by determining
 /// the appropriate breakpoint and text scale factor based on the device's screen size.

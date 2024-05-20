@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:morpheme_responsive/src/morpheme_inherited_breakpoint.dart';
-import 'package:morpheme_responsive/src/morpheme_responsive.dart';
+import 'package:morpheme_responsive/src/model/morpheme_inherited_breakpoint.dart';
+import 'package:morpheme_responsive/src/widget/morpheme_responsive.dart';
 
 extension MorphemeResponsiveContextExtension on BuildContext {
   MorphemeBreakpointsData get responsive => MorphemeResponsive.of(this);
@@ -8,9 +8,9 @@ extension MorphemeResponsiveContextExtension on BuildContext {
   bool get isTablet => responsive.isTablet();
   bool get isDesktop => responsive.isDesktop();
   double responsiveValue({
-    required double mobile,
-    double? tablet,
-    double? desktop,
+    required double Function(Orientation orientation) mobile,
+    double Function(Orientation orientation)? tablet,
+    double Function(Orientation orientation)? desktop,
   }) =>
       responsive.responsiveValue(
         mobile: mobile,
