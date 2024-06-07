@@ -1,6 +1,6 @@
 name: morpheme_responsive
 description: A Flutter package for building responsive Flutter applications with support for breakpoints on mobile, tablet, and desktop.
-version: 0.0.3
+version: 0.0.4
 homepage: https://morpheme.design/
 repository: https://github.com/morphemedesign/morpheme-flutter-library/tree/main/packages/morpheme_responsive
 
