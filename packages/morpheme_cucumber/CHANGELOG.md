@@ -1,3 +1,7 @@
+## 1.0.5
+
+- fix error jsonDecode with empty string
+
 ## 1.0.4
 
 - bump patrol to 3.7.3

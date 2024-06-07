@@ -1,6 +1,6 @@
 name: morpheme_cucumber
 description: A gherkin / cucumber integration test runner flutter with morpheme_cli.
-version: 1.0.4
+version: 1.0.5
 homepage: https://morpheme.design/
 repository: https://github.com/morphemedesign/morpheme-flutter-library/tree/main/packages/morpheme_cucumber
 

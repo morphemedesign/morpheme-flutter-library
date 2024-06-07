@@ -46,6 +46,7 @@ class MorphemeCucumber {
       final jsons = element['ndjson'].split('\n');
       for (int i = 0; i < jsons.length; i++) {
         final json = jsons[i];
+        if (json.isEmpty) continue;
         switch (i) {
           case 0:
             source = Source.fromJson(json);
