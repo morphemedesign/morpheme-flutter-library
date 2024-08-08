@@ -1,3 +1,7 @@
+## 1.3.1
+
+- bump morpheme_inspector to 1.2.1
+
 ## 1.3.0
 
 - bump morpheme_inspector to 1.2.0
