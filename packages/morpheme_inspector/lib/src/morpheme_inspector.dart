@@ -25,6 +25,12 @@ class MorphemeInspector {
   ///Flag used to check inspector is opened/dispose
   bool _inspectorOpened = false;
 
+  /// Method for handle when on tap notification when use morpheme inspector
+  final void Function(NotificationResponse)? otherSelectedNotification;
+
+  final void Function(NotificationResponse)?
+      otherBackgroundSelectedNotification;
+
   ShakeDetector? _shakeDetector;
   LocalNotification? _localNotification;
   NavigatorState? _navigatorState;
@@ -35,12 +41,18 @@ class MorphemeInspector {
     this.showNotification = true,
     this.saveInspectorToLocal = true,
     this.notificationIcon = '@mipmap/ic_launcher',
+    this.otherSelectedNotification,
+    this.otherBackgroundSelectedNotification,
   }) {
     if (showNotification && saveInspectorToLocal) {
       _localNotification = LocalNotification(
         notificationIcon: notificationIcon,
         onSelectedNotification: (notificationResponse) =>
-            onSelectedNotification(notificationResponse),
+            onSelectedNotification(
+          notificationResponse,
+          otherSelectedNotification: otherSelectedNotification,
+        ),
+        onBackgroundSelectedNotification: otherBackgroundSelectedNotification,
       );
     }
     if (showInspectorOnShake && saveInspectorToLocal) {

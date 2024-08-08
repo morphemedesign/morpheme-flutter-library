@@ -13,9 +13,13 @@ final class LocalNotification {
   /// Function for handle if notification selected.
   final void Function(NotificationResponse) onSelectedNotification;
 
+  /// Function for handle if notification selected.
+  final void Function(NotificationResponse)? onBackgroundSelectedNotification;
+
   LocalNotification({
     required this.notificationIcon,
     required this.onSelectedNotification,
+    this.onBackgroundSelectedNotification,
   }) {
     _initializeNotificationsPlugin();
   }
@@ -39,6 +43,8 @@ final class LocalNotification {
     _flutterLocalNotificationsPlugin.initialize(
       initializationSettings,
       onDidReceiveNotificationResponse: onSelectedNotification,
+      onDidReceiveBackgroundNotificationResponse:
+          onBackgroundSelectedNotification,
     );
   }
 

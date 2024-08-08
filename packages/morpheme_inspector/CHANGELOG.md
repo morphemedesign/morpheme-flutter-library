@@ -1,3 +1,8 @@
+## 1.2.1
+
+- add other selected notification
+- add other background selected notification
+
 ## 1.2.0
 
 - bump intl to 0.19.0
