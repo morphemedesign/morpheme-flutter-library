@@ -1,3 +1,7 @@
+## 1.1.1
+
+- fixing widget shimmer and wrap image with sizedbox
+
 ## 1.1.0
 
 - add set default for cacheWidth and cacheHeight for optimize the render image

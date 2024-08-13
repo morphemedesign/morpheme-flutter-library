@@ -389,61 +389,66 @@ class _MorphemeCachedNetworkImageState
             color: Colors.grey,
           );
     } else if (image == null) {
-      return _ShimmerEffect(
-        width: widget.width ?? 0,
-        height: widget.height ?? 0,
-      );
+      return widget.loadingBuilder?.call(context) ??
+          _ShimmerEffect(
+            width: widget.width,
+            height: widget.height,
+          );
     }
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        int? cacheWidth = widget.cacheWidth;
-        int? cacheHeight = widget.cacheHeight;
+    return SizedBox(
+      width: widget.width,
+      height: widget.height,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          int? cacheWidth = widget.cacheWidth;
+          int? cacheHeight = widget.cacheHeight;
 
-        if (widget.cacheWidth == null && widget.cacheHeight == null) {
-          final originImageWidth = decodeImage?.width ?? 0;
-          final originImageHeight = decodeImage?.height ?? 0;
+          if (widget.cacheWidth == null && widget.cacheHeight == null) {
+            final originImageWidth = decodeImage?.width ?? 0;
+            final originImageHeight = decodeImage?.height ?? 0;
 
-          final originImgAspectRatio = originImageWidth / originImageHeight;
+            final originImgAspectRatio = originImageWidth / originImageHeight;
 
-          // If the original image aspect ratio is greater than 0, it means the image is wider than it is tall.
-          if (originImgAspectRatio > 0) {
-            cacheHeight = cacheSize(context, constraints.maxHeight) ?? 0;
-            if (cacheHeight > originImageHeight) {
-              cacheHeight = originImageHeight;
-            }
-          } else {
-            cacheWidth = cacheSize(context, constraints.maxWidth) ?? 0;
-            if (cacheWidth > originImageWidth) {
-              cacheWidth = originImageWidth;
+            // If the original image aspect ratio is greater than 0, it means the image is wider than it is tall.
+            if (originImgAspectRatio > 0) {
+              cacheHeight = cacheSize(context, constraints.maxHeight) ?? 0;
+              if (cacheHeight > originImageHeight) {
+                cacheHeight = originImageHeight;
+              }
+            } else {
+              cacheWidth = cacheSize(context, constraints.maxWidth) ?? 0;
+              if (cacheWidth > originImageWidth) {
+                cacheWidth = originImageWidth;
+              }
             }
           }
-        }
 
-        return Image.memory(
-          image!,
-          scale: widget.scale,
-          frameBuilder: widget.frameBuilder,
-          errorBuilder: widget.errorBuilder,
-          width: widget.width,
-          height: widget.height,
-          color: widget.color,
-          opacity: widget.opacity,
-          filterQuality: widget.filterQuality,
-          colorBlendMode: widget.colorBlendMode,
-          fit: widget.fit,
-          alignment: widget.alignment,
-          repeat: widget.repeat,
-          centerSlice: widget.centerSlice,
-          matchTextDirection: widget.matchTextDirection,
-          gaplessPlayback: widget.gaplessPlayback,
-          semanticLabel: widget.semanticLabel,
-          excludeFromSemantics: widget.excludeFromSemantics,
-          isAntiAlias: widget.isAntiAlias,
-          cacheWidth: cacheWidth,
-          cacheHeight: cacheHeight,
-        );
-      },
+          return Image.memory(
+            image!,
+            scale: widget.scale,
+            frameBuilder: widget.frameBuilder,
+            errorBuilder: widget.errorBuilder,
+            width: widget.width,
+            height: widget.height,
+            color: widget.color,
+            opacity: widget.opacity,
+            filterQuality: widget.filterQuality,
+            colorBlendMode: widget.colorBlendMode,
+            fit: widget.fit,
+            alignment: widget.alignment,
+            repeat: widget.repeat,
+            centerSlice: widget.centerSlice,
+            matchTextDirection: widget.matchTextDirection,
+            gaplessPlayback: widget.gaplessPlayback,
+            semanticLabel: widget.semanticLabel,
+            excludeFromSemantics: widget.excludeFromSemantics,
+            isAntiAlias: widget.isAntiAlias,
+            cacheWidth: cacheWidth,
+            cacheHeight: cacheHeight,
+          );
+        },
+      ),
     );
   }
 }
@@ -531,12 +536,12 @@ class MorphemeCachedNetworkImageProvider extends ImageProvider<NetworkImage>
 
 class _ShimmerEffect extends StatefulWidget {
   const _ShimmerEffect({
-    required this.width,
-    required this.height,
+    this.width,
+    this.height,
   });
 
-  final double width;
-  final double height;
+  final double? width;
+  final double? height;
 
   @override
   _ShimmerEffectState createState() => _ShimmerEffectState();

@@ -50,15 +50,6 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
       ),
-      // body: Center(
-      //   child: AspectRatio(
-      //     aspectRatio: 1,
-      //     child: MorphemeCachedNetworkImage(
-      //       imageUrl: 'https://picsum.photos/id/1/1000/500',
-      //       fit: BoxFit.cover,
-      //     ),
-      //   ),
-      // ),
       body: GridView.count(
         crossAxisCount: 4,
         mainAxisSpacing: 8,
@@ -67,6 +58,8 @@ class _MyHomePageState extends State<MyHomePage> {
           for (var i = 0; i < 1000; i++)
             MorphemeCachedNetworkImage(
               imageUrl: 'https://picsum.photos/id/$i/1000/1000',
+              width: double.infinity,
+              height: double.infinity,
               fit: BoxFit.cover,
             ),
         ],
