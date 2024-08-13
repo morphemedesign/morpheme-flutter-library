@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:ui' as ui;
 
+import 'package:image/image.dart' as img;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:morpheme_cached_network_image/src/cached_manager/morpheme_cached_network_image_manager.dart';
@@ -339,11 +341,11 @@ class MorphemeCachedNetworkImage extends StatefulWidget {
 class _MorphemeCachedNetworkImageState
     extends State<MorphemeCachedNetworkImage> {
   Uint8List? image;
-  bool isLoading = false;
   Object? error;
 
+  img.Image? decodeImage;
+
   void cachedOrAsync() async {
-    if (mounted) setState(() => isLoading = true);
     await MorphemeCachedNetworkImageManager().cachedOrAsync(
       widget.imageUrl,
       (image, error) {
@@ -351,11 +353,16 @@ class _MorphemeCachedNetworkImageState
           setState(() {
             this.image = image;
             this.error = error;
+            decodeImage = image == null ? null : img.decodeImage(image);
           });
         }
       },
     );
-    if (mounted) setState(() => isLoading = false);
+  }
+
+  int? cacheSize(BuildContext context, num size) {
+    if (size == double.infinity) return null;
+    return (size * MediaQuery.of(context).devicePixelRatio).round();
   }
 
   @override
@@ -374,19 +381,7 @@ class _MorphemeCachedNetworkImageState
 
   @override
   Widget build(BuildContext context) {
-    if (image == null && isLoading) {
-      return widget.loadingBuilder?.call(context) ??
-          SizedBox(
-            width: widget.width,
-            height: widget.height,
-            child: const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Center(
-                child: CircularProgressIndicator(),
-              ),
-            ),
-          );
-    } else if (image == null && error != null) {
+    if (image == null && error != null) {
       return widget.errorBuilder?.call(context, error!, null) ??
           Container(
             width: widget.width,
@@ -394,34 +389,61 @@ class _MorphemeCachedNetworkImageState
             color: Colors.grey,
           );
     } else if (image == null) {
-      return Container(
-        width: widget.width,
-        height: widget.height,
-        color: Colors.grey,
+      return _ShimmerEffect(
+        width: widget.width ?? 0,
+        height: widget.height ?? 0,
       );
     }
-    return Image.memory(
-      image!,
-      scale: widget.scale,
-      frameBuilder: widget.frameBuilder,
-      errorBuilder: widget.errorBuilder,
-      width: widget.width,
-      height: widget.height,
-      color: widget.color,
-      opacity: widget.opacity,
-      filterQuality: widget.filterQuality,
-      colorBlendMode: widget.colorBlendMode,
-      fit: widget.fit,
-      alignment: widget.alignment,
-      repeat: widget.repeat,
-      centerSlice: widget.centerSlice,
-      matchTextDirection: widget.matchTextDirection,
-      gaplessPlayback: widget.gaplessPlayback,
-      semanticLabel: widget.semanticLabel,
-      excludeFromSemantics: widget.excludeFromSemantics,
-      isAntiAlias: widget.isAntiAlias,
-      cacheWidth: widget.cacheWidth,
-      cacheHeight: widget.cacheHeight,
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        int? cacheWidth = widget.cacheWidth;
+        int? cacheHeight = widget.cacheHeight;
+
+        if (widget.cacheWidth == null && widget.cacheHeight == null) {
+          final originImageWidth = decodeImage?.width ?? 0;
+          final originImageHeight = decodeImage?.height ?? 0;
+
+          final originImgAspectRatio = originImageWidth / originImageHeight;
+
+          // If the original image aspect ratio is greater than 0, it means the image is wider than it is tall.
+          if (originImgAspectRatio > 0) {
+            cacheHeight = cacheSize(context, constraints.maxHeight) ?? 0;
+            if (cacheHeight > originImageHeight) {
+              cacheHeight = originImageHeight;
+            }
+          } else {
+            cacheWidth = cacheSize(context, constraints.maxWidth) ?? 0;
+            if (cacheWidth > originImageWidth) {
+              cacheWidth = originImageWidth;
+            }
+          }
+        }
+
+        return Image.memory(
+          image!,
+          scale: widget.scale,
+          frameBuilder: widget.frameBuilder,
+          errorBuilder: widget.errorBuilder,
+          width: widget.width,
+          height: widget.height,
+          color: widget.color,
+          opacity: widget.opacity,
+          filterQuality: widget.filterQuality,
+          colorBlendMode: widget.colorBlendMode,
+          fit: widget.fit,
+          alignment: widget.alignment,
+          repeat: widget.repeat,
+          centerSlice: widget.centerSlice,
+          matchTextDirection: widget.matchTextDirection,
+          gaplessPlayback: widget.gaplessPlayback,
+          semanticLabel: widget.semanticLabel,
+          excludeFromSemantics: widget.excludeFromSemantics,
+          isAntiAlias: widget.isAntiAlias,
+          cacheWidth: cacheWidth,
+          cacheHeight: cacheHeight,
+        );
+      },
     );
   }
 }
@@ -505,4 +527,78 @@ class MorphemeCachedNetworkImageProvider extends ImageProvider<NetworkImage>
   @override
   String toString() =>
       '${objectRuntimeType(this, 'NetworkImage')}("$url", scale: $scale)';
+}
+
+class _ShimmerEffect extends StatefulWidget {
+  const _ShimmerEffect({
+    required this.width,
+    required this.height,
+  });
+
+  final double width;
+  final double height;
+
+  @override
+  _ShimmerEffectState createState() => _ShimmerEffectState();
+}
+
+class _ShimmerEffectState extends State<_ShimmerEffect>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (BuildContext context, Widget? child) {
+        return Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              colors: [
+                Colors.grey.withOpacity(0.5),
+                Colors.grey.withOpacity(0.8),
+                Colors.grey.withOpacity(0.5),
+              ],
+              stops: const [0.2, 0.5, 0.8],
+            ),
+          ),
+          foregroundDecoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment(-1.0 + _controller.value, 0.0),
+              end: Alignment(1.0 + _controller.value, 0.0),
+              colors: [
+                Colors.white.withOpacity(0.0),
+                Colors.white.withOpacity(0.5),
+                Colors.white.withOpacity(0.0),
+              ],
+              stops: const [0.0, 0.5, 1.0],
+            ),
+          ),
+          child: child,
+        );
+      },
+      child: Container(
+        width: widget.width,
+        height: widget.height,
+        color: Colors.grey[200],
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 }
