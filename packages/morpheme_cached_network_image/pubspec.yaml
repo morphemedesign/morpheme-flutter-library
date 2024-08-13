@@ -1,6 +1,6 @@
 name: morpheme_cached_network_image
 description: Flutter library to load and cache network images. Can also be used with loading and error widgets.
-version: 1.1.1
+version: 1.1.2
 homepage: https://morpheme.design/
 repository: https://github.com/morphemedesign/morpheme-flutter-library/tree/main/packages/morpheme_cached_network_image
 

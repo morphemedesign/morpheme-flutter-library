@@ -424,6 +424,9 @@ class _MorphemeCachedNetworkImageState
             }
           }
 
+          if (cacheWidth == 0) cacheWidth = null;
+          if (cacheHeight == 0) cacheHeight = null;
+
           return Image.memory(
             image!,
             scale: widget.scale,
