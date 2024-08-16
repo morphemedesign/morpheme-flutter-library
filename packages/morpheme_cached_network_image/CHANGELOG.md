@@ -1,3 +1,7 @@
+## 1.1.3
+
+- fixing MorphemeCachedNetworkImage when cacheWidth or cacheHeight is zero
+
 ## 1.1.2
 
 - fixing MorphemeCachedNetworkImage when cacheWidth or cacheHeight is zero

@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'dart:ui' as ui;
 
-import 'package:image/image.dart' as img;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:morpheme_cached_network_image/src/cached_manager/morpheme_cached_network_image_manager.dart';
@@ -343,8 +341,6 @@ class _MorphemeCachedNetworkImageState
   Uint8List? image;
   Object? error;
 
-  img.Image? decodeImage;
-
   void cachedOrAsync() async {
     await MorphemeCachedNetworkImageManager().cachedOrAsync(
       widget.imageUrl,
@@ -353,7 +349,6 @@ class _MorphemeCachedNetworkImageState
           setState(() {
             this.image = image;
             this.error = error;
-            decodeImage = image == null ? null : img.decodeImage(image);
           });
         }
       },
@@ -401,27 +396,19 @@ class _MorphemeCachedNetworkImageState
       height: widget.height,
       child: LayoutBuilder(
         builder: (context, constraints) {
-          int? cacheWidth = widget.cacheWidth;
-          int? cacheHeight = widget.cacheHeight;
+          int? cacheWidth = widget.cacheWidth ??
+              cacheSize(context, constraints.maxWidth) ??
+              0;
+          int? cacheHeight = widget.cacheHeight ??
+              cacheSize(context, constraints.maxHeight) ??
+              0;
 
-          if (widget.cacheWidth == null && widget.cacheHeight == null) {
-            final originImageWidth = decodeImage?.width ?? 0;
-            final originImageHeight = decodeImage?.height ?? 0;
+          final aspectRatio = cacheWidth / cacheHeight;
 
-            final originImgAspectRatio = originImageWidth / originImageHeight;
-
-            // If the original image aspect ratio is greater than 0, it means the image is wider than it is tall.
-            if (originImgAspectRatio > 0) {
-              cacheHeight = cacheSize(context, constraints.maxHeight) ?? 0;
-              if (cacheHeight > originImageHeight) {
-                cacheHeight = originImageHeight;
-              }
-            } else {
-              cacheWidth = cacheSize(context, constraints.maxWidth) ?? 0;
-              if (cacheWidth > originImageWidth) {
-                cacheWidth = originImageWidth;
-              }
-            }
+          if (aspectRatio > 0) {
+            cacheWidth = null;
+          } else {
+            cacheHeight = null;
           }
 
           if (cacheWidth == 0) cacheWidth = null;
