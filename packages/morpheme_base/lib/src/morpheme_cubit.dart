@@ -1,16 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-extension CubitMaybeEmit<T> on Cubit<T> {
-  @protected
-  void maybeEmit(T state) {
-    if (isClosed) return;
-
-    // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
-    emit(state);
-  }
-}
-
 /// A [MorphemeCubit] is abstract class with extend [Cubit] purpose
 /// to make clean state management combine with [MorphemeStatePage]
 abstract class MorphemeCubit<T> extends Cubit<T> {
@@ -114,6 +104,13 @@ abstract class MorphemeCubit<T> extends Cubit<T> {
 
   /// Called when this object is closes the instance.
   void dispose() {}
+
+  @override
+  void emit(T state) {
+    if (isClosed) return;
+
+    super.emit(state);
+  }
 
   /// Closes the instance.
   /// This method should be called when the instance is no longer needed.

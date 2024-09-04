@@ -1,3 +1,7 @@
+## 1.2.0
+
+- override emit for safety when cubit is closed.
+
 ## 1.1.0
 
 - add cubit extension for maybe emit for safe call emit when stream is closed.
