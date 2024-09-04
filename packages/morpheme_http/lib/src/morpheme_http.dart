@@ -28,6 +28,7 @@ class MorphemeHttp {
     AuthTokenOption? authTokenOption,
     RefreshTokenOption? refreshTokenOption,
     MiddlewareResponseOption? middlewareResponseOption,
+    void Function(Object error, StackTrace stackTrace)? onErrorResponse,
   })  : _timeout = timeout,
         _morphemeInspector = morphemeInspector,
         _showLog = showLog,
@@ -35,7 +36,8 @@ class MorphemeHttp {
         _authTokenOption = authTokenOption,
         _refreshTokenOption = refreshTokenOption,
         _middlewareResponseOption = middlewareResponseOption,
-        _storage = CacheStorage();
+        _storage = CacheStorage(),
+        _onErrorResponse = onErrorResponse;
 
   /// Logger used for logging request and response http to console.
   final Logger _logger = Logger(
@@ -72,6 +74,8 @@ class MorphemeHttp {
   final MiddlewareResponseOption? _middlewareResponseOption;
 
   final Storage _storage;
+
+  final void Function(Object error, StackTrace stackTrace)? _onErrorResponse;
 
   /// Return new headers with given [url] and old [headers],
   /// include set authorization.
@@ -278,7 +282,8 @@ class MorphemeHttp {
       return response;
     } on SocketException {
       throw morpheme_exception.NoInternetException();
-    } catch (e) {
+    } catch (e, stackTrace) {
+      _onErrorResponse?.call(e, stackTrace);
       rethrow;
     }
   }
@@ -456,7 +461,8 @@ class MorphemeHttp {
       return response;
     } on SocketException {
       throw morpheme_exception.NoInternetException();
-    } catch (e) {
+    } catch (e, stackTrace) {
+      _onErrorResponse?.call(e, stackTrace);
       rethrow;
     }
   }
@@ -495,7 +501,8 @@ class MorphemeHttp {
       return response;
     } on SocketException {
       throw morpheme_exception.NoInternetException();
-    } catch (e) {
+    } catch (e, stackTrace) {
+      _onErrorResponse?.call(e, stackTrace);
       rethrow;
     }
   }
@@ -574,7 +581,8 @@ class MorphemeHttp {
       return response;
     } on SocketException {
       throw morpheme_exception.NoInternetException();
-    } catch (e) {
+    } catch (e, stackTrace) {
+      _onErrorResponse?.call(e, stackTrace);
       rethrow;
     }
   }

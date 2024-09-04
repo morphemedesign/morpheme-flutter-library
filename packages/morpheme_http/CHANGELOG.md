@@ -1,3 +1,7 @@
+## 1.4.0
+
+- add method onErrorResponse for handle error response
+
 ## 1.3.1
 
 - bump morpheme_inspector to 1.2.1
