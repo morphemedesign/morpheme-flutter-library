@@ -91,7 +91,7 @@ abstract class MorphemeCubit<T> extends Cubit<T> {
   ///   if (state is LoginFailed) {
   ///     state.failure.showSnackbar(context);
   ///   } else if (state is LoginSuccess) {
-  ///     context.go(MorphemeRoutes.main);
+  ///     context.go(ConstantRoutes.main);
   ///   }
   /// }
   /// ```

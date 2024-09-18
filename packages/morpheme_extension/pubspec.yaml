@@ -1,6 +1,6 @@
 name: morpheme_extension
 description: Superpowers for Dart. Collection of useful static extension methods.
-version: 1.0.1
+version: 1.1.0
 homepage: https://morpheme.design/
 repository: https://github.com/morphemedesign/morpheme-flutter-library/tree/main/packages/morpheme_extension
 
