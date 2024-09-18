@@ -1,3 +1,7 @@
+## 1.5.0
+
+- change params files from Map<String, File> to Map<String, List<File>> for support multiple files in one key
+
 ## 1.4.0
 
 - add method onErrorResponse for handle error response

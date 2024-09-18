@@ -404,16 +404,18 @@ class MorphemeHttp {
   Future<MultipartRequest> _getMultiPartRequest(
     Uri url, {
     required method,
-    Map<String, File>? files,
+    Map<String, List<File>>? files,
     Map<String, String>? headers,
     Map<String, String>? body,
   }) async {
     var request = MultipartRequest(method, url);
     final keys = files?.keys ?? [];
     for (var key in keys) {
-      final multipartFile =
-          await MultipartFile.fromPath(key, files?[key]?.path ?? '');
-      request.files.add(multipartFile);
+      for (var file in files?[key] ?? []) {
+        final multipartFile =
+            await MultipartFile.fromPath(key, file?.path ?? '');
+        request.files.add(multipartFile);
+      }
     }
 
     if (!(headers != null &&
@@ -437,7 +439,7 @@ class MorphemeHttp {
   /// [body] sets the body of the multipart request. It a [Map<String, String>].
   Future<Response> postMultipart(
     Uri url, {
-    Map<String, File>? files,
+    Map<String, List<File>>? files,
     Map<String, String>? headers,
     Map<String, String>? body,
   }) async {
@@ -477,7 +479,7 @@ class MorphemeHttp {
   /// [body] sets the body of the multipart request. It a [Map<String, String>].
   Future<Response> patchMultipart(
     Uri url, {
-    Map<String, File>? files,
+    Map<String, List<File>>? files,
     Map<String, String>? headers,
     Map<String, String>? body,
   }) async {
