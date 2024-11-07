@@ -42,7 +42,7 @@ class _MorphemeInspectorPageState extends State<MorphemeInspectorPage> {
   ///
   /// [page] The current page number being loaded.
   Future<void> onPagingLoad(int page) async {
-    final offset = page * limit;
+    final offset = (page - 1) * limit;
     final list = await InspectorService.getAll(
       keyword: keyword,
       limit: limit,

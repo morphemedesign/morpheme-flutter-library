@@ -1,3 +1,7 @@
+## 2.0.1
+
+- fix pagination list inspector
+
 ## 2.0.0
 
 - bump minimal flutter version 3.24.0
