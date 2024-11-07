@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 /// Show text item with given [title] and [value].
 class TextItemInspector extends StatelessWidget {
@@ -26,6 +27,11 @@ class TextItemInspector extends StatelessWidget {
         Expanded(
           flex: 7,
           child: SelectableText(value),
+        ),
+        IconButton(
+          onPressed: () => Clipboard.setData(ClipboardData(text: value)),
+          iconSize: 16,
+          icon: Icon(Icons.copy),
         ),
       ],
     );

@@ -1,3 +1,8 @@
+## 2.0.0
+
+- bump minimal flutter version 3.24.0
+- change cache strategy storage hive to objectbox
+
 ## 1.5.0
 
 - change params files from Map<String, File> to Map<String, List<File>> for support multiple files in one key

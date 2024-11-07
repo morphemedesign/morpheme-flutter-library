@@ -1,3 +1,13 @@
+## 2.0.0
+
+- bump minimal flutter version 3.24.0
+- add pagination for list inspector
+- add icon button copy to clipboard for items inspector
+- bump dependencies to sqflite: ^2.4.0
+- bump dependencies to sensors_plus: ^6.1.0
+- bump dependencies to flutter_local_notifications: ^18.0.0
+- bump dependencies to share_plus: ^10.1.1
+
 ## 1.2.1
 
 - add other selected notification

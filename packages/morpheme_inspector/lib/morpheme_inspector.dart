@@ -1,5 +1,3 @@
-library morpheme_inspector;
-
 export 'src/models/inspector.dart';
 export 'src/models/request_inspector.dart';
 export 'src/models/response_inspector.dart';

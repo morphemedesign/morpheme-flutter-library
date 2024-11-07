@@ -1,5 +1,3 @@
-library morpheme_http;
-
 export 'package:morpheme_http/src/cache_strategy/cache_strategy.dart';
 export 'package:morpheme_http/src/errors/morpheme_exceptions.dart';
 export 'package:morpheme_http/src/errors/morpheme_failures.dart';

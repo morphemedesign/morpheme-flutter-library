@@ -1,19 +1,24 @@
 import 'dart:typed_data';
 
-import 'package:hive/hive.dart';
+import 'package:objectbox/objectbox.dart';
 
-part 'cached_model.g.dart';
-
-@HiveType(typeId: 0)
+@Entity()
 class CachedModel {
   CachedModel({
+    required this.imageUrl,
     required this.image,
     required this.ttl,
   });
 
-  @HiveField(0)
+  @Id()
+  int id = 0;
+
+  @Index(type: IndexType.value)
+  @Unique(onConflict: ConflictStrategy.replace)
+  final String imageUrl;
+
+  @Property(type: PropertyType.byteVector)
   final Uint8List image;
 
-  @HiveField(1)
   final int ttl;
 }

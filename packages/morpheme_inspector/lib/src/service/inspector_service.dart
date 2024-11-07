@@ -68,10 +68,16 @@ abstract final class InspectorService {
   }
 
   /// Return list [Inspector] with given [limit] and [offset].
-  static Future<List<Inspector>> getAll({int? limit, int? offset}) async {
+  static Future<List<Inspector>> getAll({
+    String? keyword,
+    int? limit,
+    int? offset,
+  }) async {
     await _validateDatabaseOpened();
     final listMap = await _db?.query(
           _table,
+          where: keyword != null ? '$_request LIKE ?' : null,
+          whereArgs: keyword != null ? ['%$keyword%'] : null,
           orderBy: '$_createdAt DESC',
           limit: limit,
           offset: offset,

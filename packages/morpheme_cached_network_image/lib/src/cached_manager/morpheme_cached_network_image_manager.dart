@@ -2,8 +2,9 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:morpheme_cached_network_image/src/model/cached_model.dart';
-import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
+import 'package:morpheme_cached_network_image/src/model/objectbox.g.dart';
+import 'package:path_provider/path_provider.dart';
 
 typedef CallbackCachedManager = void Function(Uint8List? image, Object? error);
 
@@ -15,9 +16,23 @@ class MorphemeCachedNetworkImageManager {
     return instance;
   }
 
-  MorphemeCachedNetworkImageManager._() {
-    Hive.registerAdapter(CachedModelAdapter());
-  }
+  MorphemeCachedNetworkImageManager._();
+
+  /// The name of the ObjectBox store used for caching network images.
+  ///
+  /// This constant defines the directory name where the ObjectBox store
+  /// will be located. It is used to store and manage cached network images
+  /// efficiently. The store is initialized and accessed using this name.
+  static const _storeName = "morpheme_cached_network_image";
+
+  /// Initializes the MorphemeCachedNetworkImageManager by opening the ObjectBox store.
+  ///
+  /// This method should be called before any operations that require access to the
+  /// cached network images. It ensures that the ObjectBox store is opened and ready
+  /// for use. If the store is already open, this method does nothing.
+  ///
+  /// Returns a [Future] that completes when the store is successfully opened.
+  Future<void> init() => _openStore();
 
   /// `Duration ttl = const Duration(days: 30);` is declaring a default time-to-live (TTL) duration for
   /// cached images. The TTL is the amount of time that a cached image is considered valid before it
@@ -30,13 +45,21 @@ class MorphemeCachedNetworkImageManager {
   int maxConcurrent = 10;
   int _concurrent = 0;
 
-  Box<CachedModel>? _box;
+  Store? _store;
 
-  /// This function opens a Hive box for storing cached network images if it is not already open.
-  Future<void> _open() async {
-    final isOpen = _box?.isOpen ?? false;
-    if (!isOpen) {
-      _box = await Hive.openBox<CachedModel>('morpheme_cached_network_image');
+  Box<CachedModel>? get _box => _store?.box<CachedModel>();
+  Query<CachedModel>? queryByImageUrl(String imageUrl) =>
+      _box?.query(CachedModel_.imageUrl.equals(imageUrl)).build();
+
+  /// This function opens a Object box for storing cached network images if it is not already open.
+  Future<void> _openStore() async {
+    final storeExists = _store != null;
+    if (!storeExists) {
+      final docsDir = await getApplicationDocumentsDirectory();
+      // Future<Store> openStore() {...} is defined in the generated objectbox.g.dart
+      _store = await openStore(
+        directory: '${docsDir.path}/$_storeName',
+      );
     }
   }
 
@@ -58,10 +81,11 @@ class MorphemeCachedNetworkImageManager {
       final response = await http.get(Uri.parse(imageUrl));
       if (response.statusCode == 200) {
         final cachedModel = CachedModel(
+          imageUrl: imageUrl,
           image: response.bodyBytes,
           ttl: DateTime.now().add(ttl).millisecondsSinceEpoch,
         );
-        await _box?.put(imageUrl, cachedModel);
+        _box?.put(cachedModel);
         callback(response.bodyBytes, null);
       } else {
         callback(
@@ -85,7 +109,7 @@ class MorphemeCachedNetworkImageManager {
   ///   If the cached image exists and its time-to-live (ttl) has not expired, then the cached image is
   /// returned as a Uint8List. Otherwise, null is returned.
   Uint8List? _handleCache(String imageUrl) {
-    final cached = _box?.get(imageUrl);
+    final cached = queryByImageUrl(imageUrl)?.findFirst();
     if (cached != null && cached.ttl > DateTime.now().millisecondsSinceEpoch) {
       return cached.image;
     }
@@ -106,7 +130,7 @@ class MorphemeCachedNetworkImageManager {
   ///   a `Future<void>`.
   Future<void> cachedOrAsync(
       String imageUrl, CallbackCachedManager callback) async {
-    await _open();
+    await _openStore();
 
     final cached = _handleCache(imageUrl);
     if (cached != null) {
@@ -138,7 +162,7 @@ class MorphemeCachedNetworkImageManager {
   ///   The function `cachedOrAsyncProvider` returns a `Future` that resolves to a `Uint8List` or
   /// `null`.
   Future<Uint8List?> cachedOrAsyncProvider(String imageUrl) async {
-    await _open();
+    await _openStore();
 
     final cached = _handleCache(imageUrl);
     if (cached != null) {
@@ -157,22 +181,22 @@ class MorphemeCachedNetworkImageManager {
   ///   imageUrl (String): The `imageUrl` parameter is a `String` that represents the URL of an image
   /// that needs to be removed from the cache.
   Future<void> removeCache(String imageUrl) async {
-    await _open();
-    await _box?.delete(imageUrl);
+    await _openStore();
+    queryByImageUrl(imageUrl)?.remove();
   }
 
   /// This function clears all data stored in a box.
   Future<void> clear() async {
-    await _open();
-    await _box?.clear();
+    await _openStore();
+    _box?.removeAll();
   }
 
   /// This function closes a box if it is open and sets it to null.
   Future<void> close() async {
-    final isOpen = _box?.isOpen ?? false;
-    if (isOpen) {
-      await _box?.close();
+    final isOpenStore = _store != null;
+    if (isOpenStore) {
+      _store?.close();
     }
-    _box = null;
+    _store = null;
   }
 }

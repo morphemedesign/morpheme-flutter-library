@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:morpheme_http/morpheme_http.dart';
@@ -20,10 +18,11 @@ abstract class CacheStrategy extends Equatable {
     Storage storage,
   ) async {
     final cacheWrapper = CacheWrapper(
+      key: key,
       cacheDate: DateTime.now().millisecondsSinceEpoch,
       response: response,
     );
-    await storage.write(key, jsonEncode(cacheWrapper.toJson()));
+    await storage.write(cacheWrapper);
   }
 
   /// If the cache is expired,
@@ -84,9 +83,8 @@ abstract class CacheStrategy extends Equatable {
     bool keepExpiredCache = false,
     Duration ttlValue = defaultTTLValue,
   }) async {
-    final value = await storage.read(key);
-    if (value != null) {
-      final cacheWrapper = CacheWrapper.fromJson(jsonDecode(value));
+    final cacheWrapper = await storage.read(key);
+    if (cacheWrapper != null) {
       if (_isValid(cacheWrapper, keepExpiredCache, ttlValue)) {
         if (kDebugMode) {
           print("Fetch cache data for key $key: ${cacheWrapper.response}");

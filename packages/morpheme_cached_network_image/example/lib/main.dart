@@ -1,19 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
 import 'package:morpheme_cached_network_image/morpheme_cached_network_image.dart';
-import 'package:path_provider/path_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   debugInvertOversizedImages = kDebugMode;
 
-  if (!kIsWeb) {
-    Hive.init(
-      '${(await getApplicationDocumentsDirectory()).path}/${'morpheme_cached_network'}',
-    );
-  }
+  await MorphemeCachedNetworkImageManager.instance.init();
 
   runApp(const MyApp());
 }

@@ -1,18 +1,18 @@
 # Morpheme Cached Network Image
 
-A flutter library to show images from the internet and keep them in the cache directory powered with Hive.
+A flutter library to show images from the internet and keep them in the cache directory powered with Objectbox.
 
 ## How to use
 
 The MorphemeCachedNetworkImage can be used directly or through the ImageProvider.
 
-Need to Hive.init in first main.
+Need to MorphemeCachedNetworkImageManager.instance.init in first main.
 
 ```dart
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  if(!kIsWeb) Hive.init((await getApplicationDocumentsDirectory()).path);
+  await MorphemeCachedNetworkImageManager.instance.init();
 
   runApp(const MyApp());
 }

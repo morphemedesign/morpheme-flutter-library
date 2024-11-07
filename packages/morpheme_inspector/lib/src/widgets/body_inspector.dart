@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 /// Body widget for show [title] and [value].
 class BodyInspector extends StatelessWidget {
@@ -16,9 +17,20 @@ class BodyInspector extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SelectableText(
-          title,
-          style: const TextStyle(fontWeight: FontWeight.w600),
+        Row(
+          children: [
+            Expanded(
+              child: SelectableText(
+                title,
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+            IconButton(
+              onPressed: () => Clipboard.setData(ClipboardData(text: value)),
+              iconSize: 16,
+              icon: Icon(Icons.copy),
+            ),
+          ],
         ),
         const SizedBox(height: 8),
         SelectableText(value),

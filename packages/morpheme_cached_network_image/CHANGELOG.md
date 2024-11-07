@@ -1,3 +1,9 @@
+## 2.0.0
+
+- bump flutter version minimal 3.24.0
+- change local storage hive to objectbox
+- update docs README.md
+
 ## 1.1.3
 
 - fixing MorphemeCachedNetworkImage when cacheWidth or cacheHeight is zero

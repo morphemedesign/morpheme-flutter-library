@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:morpheme_inspector/src/extensions/inspector_extensions.dart';
 import 'package:morpheme_inspector/src/pages/morpheme_inspector_detail_page.dart';
 import 'package:morpheme_inspector/src/widgets/item_inspector.dart';
+import 'package:morpheme_inspector/src/widgets/pagination/list_view_pagination.dart';
+import 'package:morpheme_inspector/src/widgets/pagination/models/pagination_builder_delegate.dart';
+import 'package:morpheme_inspector/src/widgets/pagination/models/paging_controller.dart';
 import 'package:morpheme_inspector/src/widgets/theme_inspector.dart';
 
 import '../models/inspector.dart';
@@ -16,67 +18,68 @@ class MorphemeInspectorPage extends StatefulWidget {
 }
 
 class _MorphemeInspectorPageState extends State<MorphemeInspectorPage> {
-  /// The master data list of [Inspector]
-  List<Inspector> masterListInspector = [];
+  /// Controller for managing pagination of [Inspector] items.
+  /// This controller handles the loading and appending of paginated data.
+  final pagingController = PagingController<Inspector>();
 
-  /// The list of [Inspector] will used to show list data inspector.
-  List<Inspector> listInspector = [];
+  /// The maximum number of items to load per page.
+  final int limit = 20;
 
   /// Flag used to toggle search mode.
   bool isSearchMode = false;
 
-  /// Emit list of [Inspector] get all data from local data
-  void getAllInspector() async {
-    final list = await InspectorService.getAll();
-    masterListInspector = List.from(list);
-    setState(() {
-      listInspector = List.from(list);
-    });
+  /// The keyword used for searching inspectors.
+  String? keyword;
+
+  /// Handles the loading of paginated data.
+  ///
+  /// This method is triggered when a new page of data is requested.
+  /// It calculates the offset based on the current [page] and the predefined [limit].
+  /// It then fetches a list of [Inspector] objects from the [InspectorService].
+  /// If the number of items fetched is less than the [limit], it appends the items
+  /// as the last set of items to the [pagingController]. Otherwise, it appends
+  /// the items normally.
+  ///
+  /// [page] The current page number being loaded.
+  Future<void> onPagingLoad(int page) async {
+    final offset = page * limit;
+    final list = await InspectorService.getAll(
+      keyword: keyword,
+      limit: limit,
+      offset: offset,
+    );
+
+    if (list.length < limit) {
+      pagingController.appendLastItems(list);
+    } else {
+      pagingController.appendItems(list);
+    }
   }
 
   /// Emit list of [Inspector] to empty and delete all data from local
   void deleteAll() async {
     await InspectorService.deleteAll();
-    setState(() {
-      listInspector = [];
-      masterListInspector = [];
-    });
+    pagingController.reset();
   }
 
   /// Emit toggle to change search mode
   void onChangeToSearch() {
     setState(() {
       isSearchMode = !isSearchMode;
-      listInspector = List.from(masterListInspector);
+      pagingController.reset();
     });
   }
 
   /// Emit list of [Inspector] when on change from search with give [value]
   void onSearchChanged(String value) {
-    if (value.isEmpty) {
-      setState(() {
-        listInspector = List.from(masterListInspector);
-      });
-      return;
-    }
-    var search = List<Inspector>.from(masterListInspector);
-    search = search
-        .where((element) => element.pathWithQuery.contains(value))
-        .toList();
-    setState(() {
-      listInspector = search;
-    });
+    keyword = value.isEmpty ? null : value;
+
+    pagingController.reset();
   }
 
   /// Navigate to [MorphemeInspectorDetailPage]
   void navigateToDetail(BuildContext context, Inspector inspector) =>
       MorphemeInspectorDetailPage.navigate(context, inspector);
-
-  @override
-  void initState() {
-    super.initState();
-    getAllInspector();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -97,17 +100,20 @@ class _MorphemeInspectorPageState extends State<MorphemeInspectorPage> {
             )
           ],
         ),
-        body: ListView.separated(
-          itemBuilder: (context, index) => ItemInspector(
-            item: listInspector[index],
-            onItemPressed: (item) => navigateToDetail(
-              context,
-              item,
-            ),
-          ),
+        body: ListViewPagination<Inspector>(
+          pagingController: pagingController,
+          onPagingLoad: onPagingLoad,
           separatorBuilder: (_, __) =>
               Container(height: 1, color: Colors.grey[800]),
-          itemCount: listInspector.length,
+          paginationBuilderDelegate: PaginationBuilderDelegate(
+            builder: (context, item, index) => ItemInspector(
+              item: item,
+              onItemPressed: (item) => navigateToDetail(
+                context,
+                item,
+              ),
+            ),
+          ),
         ),
       ),
     );

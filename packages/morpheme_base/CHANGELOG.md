@@ -1,3 +1,7 @@
+## 1.2.1
+
+- bump flutter_bloc to 8.1.6 
+
 ## 1.2.0
 
 - override emit for safety when cubit is closed.
