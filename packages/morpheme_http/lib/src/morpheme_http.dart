@@ -311,10 +311,19 @@ class MorphemeHttp {
 
     var request = _getRequest(method, url, headers, body, encoding);
     final response = await _fetch(request, body);
-    _handleRefreshTokenErrorResponse(
-      response,
-    );
-    await refreshTokenOption.onResponse(response);
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      await refreshTokenOption.onResponse(response);
+    } else {
+      final isValidResponse =
+          await (refreshTokenOption.onErrorResponse?.call(response) ??
+              Future.value(false));
+      if (!isValidResponse) {
+        throw morpheme_exception.RefreshTokenException(
+          statusCode: response.statusCode,
+          jsonBody: response.body,
+        );
+      }
+    }
   }
 
   Future<Response> get(
@@ -674,16 +683,6 @@ class MorphemeHttp {
       );
     } else if (response.statusCode >= 300) {
       throw morpheme_exception.RedirectionException(
-        statusCode: response.statusCode,
-        jsonBody: response.body,
-      );
-    }
-  }
-
-  /// Throws an [RefreshTokenException] if [response] is not successfull.
-  void _handleRefreshTokenErrorResponse(Response response) {
-    if (response.statusCode >= 300) {
-      throw morpheme_exception.RefreshTokenException(
         statusCode: response.statusCode,
         jsonBody: response.body,
       );

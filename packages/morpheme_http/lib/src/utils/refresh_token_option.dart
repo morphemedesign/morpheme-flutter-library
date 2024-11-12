@@ -5,6 +5,10 @@ import 'package:http/http.dart';
 /// Callback refresh token response trigger condition from [condition]
 typedef RefreshTokenResponse = Future<void> Function(Response response);
 
+/// Callback refresh token error response trigger condition from [condition] and response is error
+/// return [Future<bool>] for retry request or not
+typedef RefreshTokenErrorResponse = Future<bool> Function(Response response);
+
 /// Refresh token condition return [Future<bool>] from condition [BaseRequest] or [Response]
 typedef ConditionRequireRefreshToken = Future<bool> Function(
     BaseRequest request, Response response);
@@ -38,6 +42,7 @@ final class RefreshTokenOption {
     this.encoding,
     required this.condition,
     required this.onResponse,
+    this.onErrorResponse,
   });
 
   /// Method http call refresh token
@@ -70,4 +75,7 @@ final class RefreshTokenOption {
 
   /// Callbak from [condition] is true
   final RefreshTokenResponse onResponse;
+
+  /// Callbak from [condition] is true and response is error
+  final RefreshTokenErrorResponse? onErrorResponse;
 }

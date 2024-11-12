@@ -1,3 +1,7 @@
+## 2.2.0
+
+- add onErrorResponse in refresh token option
+
 ## 2.1.0
 
 - set to Future all condition in auth_token_option, refresh_token_option and middleware_response_option
