@@ -1,3 +1,7 @@
+## 2.1.0
+
+- set to Future all condition in auth_token_option, refresh_token_option and middleware_response_option
+
 ## 2.0.1
 
 - bump morpheme_inspector to 2.0.1

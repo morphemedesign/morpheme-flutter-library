@@ -5,8 +5,8 @@ import 'package:http/http.dart';
 /// Callback refresh token response trigger condition from [condition]
 typedef RefreshTokenResponse = Future<void> Function(Response response);
 
-/// Refresh token condition return [bool] from condition [BaseRequest] or [Response]
-typedef ConditionRequireRefreshToken = bool Function(
+/// Refresh token condition return [Future<bool>] from condition [BaseRequest] or [Response]
+typedef ConditionRequireRefreshToken = Future<bool> Function(
     BaseRequest request, Response response);
 
 /// Function async for get headers http call

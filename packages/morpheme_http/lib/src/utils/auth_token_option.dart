@@ -6,11 +6,13 @@ typedef GetToken = Future<String?> Function();
 /// Callback auth token response trigger condition from [authCondition]
 typedef OnAuthTokenResponse = Future<void> Function(Response response);
 
-/// Auth token condition return [bool] from condition [BaseRequest] or [Response]
-typedef AuthCondition = bool Function(BaseRequest request, Response response);
+/// Auth token condition return [Future<bool>] from condition [BaseRequest] or [Response]
+typedef AuthCondition = Future<bool> Function(
+    BaseRequest request, Response response);
 
-/// Clear token condition return [bool] from condition [BaseRequest] or [Response]
-typedef ClearCondition = bool Function(BaseRequest request, Response response);
+/// Clear token condition return [Future<bool>] from condition [BaseRequest] or [Response]
+typedef ClearCondition = Future<bool> Function(
+    BaseRequest request, Response response);
 
 /// Callback clear token response trigger condition from [clearCondition]
 typedef OnClearToken = Future<void> Function();
@@ -83,10 +85,10 @@ extension AuthTokenOptionExtension on AuthTokenOption {
     BaseRequest request,
     Response response,
   ) async {
-    if (authCondition(request, response)) {
+    if (await authCondition(request, response)) {
       await onAuthTokenResponse.call(response);
     }
-    if (clearCondition?.call(request, response) ?? false) {
+    if (await clearCondition?.call(request, response) ?? false) {
       await onClearToken?.call();
     }
   }

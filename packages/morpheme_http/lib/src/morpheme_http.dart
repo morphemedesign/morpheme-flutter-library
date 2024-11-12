@@ -263,11 +263,12 @@ class MorphemeHttp {
           Response response = await _fetch(request, body);
 
           // do refresh token if condition is true
-          if (_refreshTokenOption?.condition(request, response) ?? false) {
+          if (await _refreshTokenOption?.condition(request, response) ??
+              false) {
             response = await _doRefreshTokenThenRetry(request, response, body);
           }
 
-          if (_middlewareResponseOption?.condition(request, response) ??
+          if (await _middlewareResponseOption?.condition(request, response) ??
               false) {
             await _middlewareResponseOption?.onResponse(response);
           }
@@ -451,11 +452,12 @@ class MorphemeHttp {
       Response response = await _fetch(request, body);
 
       // do refresh token if condition is true
-      if (_refreshTokenOption?.condition(request, response) ?? false) {
+      if (await _refreshTokenOption?.condition(request, response) ?? false) {
         response = await _doRefreshTokenThenRetry(request, response, body);
       }
 
-      if (_middlewareResponseOption?.condition(request, response) ?? false) {
+      if (await _middlewareResponseOption?.condition(request, response) ??
+          false) {
         await _middlewareResponseOption?.onResponse(response);
       }
 
@@ -491,11 +493,12 @@ class MorphemeHttp {
       Response response = await _fetch(request, body);
 
       // do refresh token if condition is true
-      if (_refreshTokenOption?.condition(request, response) ?? false) {
+      if (await _refreshTokenOption?.condition(request, response) ?? false) {
         response = await _doRefreshTokenThenRetry(request, response, body);
       }
 
-      if (_middlewareResponseOption?.condition(request, response) ?? false) {
+      if (await _middlewareResponseOption?.condition(request, response) ??
+          false) {
         await _middlewareResponseOption?.onResponse(response);
       }
 
@@ -573,7 +576,8 @@ class MorphemeHttp {
 
       final response = await _fetchDownload(request, body, onProgress);
 
-      if (_middlewareResponseOption?.condition(request, response) ?? false) {
+      if (await _middlewareResponseOption?.condition(request, response) ??
+          false) {
         await _middlewareResponseOption?.onResponse(response);
       }
 

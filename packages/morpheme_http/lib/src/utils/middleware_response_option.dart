@@ -3,8 +3,8 @@ import 'package:http/http.dart';
 /// Callback middleware response trigger condition from [condition]
 typedef OnMiddlewareResponse = Future<void> Function(Response response);
 
-/// Middleware response condition return [bool] from condition [BaseRequest] or [Response]
-typedef ConditionMiddlewareResponse = bool Function(
+/// Middleware response condition return [Future<bool>] from condition [BaseRequest] or [Response]
+typedef ConditionMiddlewareResponse = Future<bool> Function(
     BaseRequest request, Response response);
 
 final class MiddlewareResponseOption {
