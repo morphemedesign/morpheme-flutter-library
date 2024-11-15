@@ -61,7 +61,7 @@ abstract class CacheStrategy extends Equatable {
     if (response.statusCode >= 200 &&
         response.statusCode <= 299 &&
         (this is AsyncOrCacheStrategy || this is CacheOrAsyncStrategy)) {
-      _storeCacheData(key, response, storage);
+      await _storeCacheData(key, response, storage);
     }
     return response;
   }

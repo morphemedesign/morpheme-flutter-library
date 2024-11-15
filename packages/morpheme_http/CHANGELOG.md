@@ -1,3 +1,7 @@
+## 2.2.1
+
+- fix async/await in CacheStorage methods
+
 ## 2.2.0
 
 - add onErrorResponse in refresh token option
