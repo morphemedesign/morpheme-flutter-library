@@ -262,10 +262,18 @@ class MorphemeHttp {
         fetch: () async {
           Response response = await _fetch(request, body);
 
+          final isDoRefreshToken =
+              await _refreshTokenOption?.condition(request, response) ?? false;
+          final isJustDoRefetch = await _refreshTokenOption
+                  ?.conditionReFetchWithoutRefreshToken
+                  ?.call(request, response) ??
+              false;
+
           // do refresh token if condition is true
-          if (await _refreshTokenOption?.condition(request, response) ??
-              false) {
+          if (isDoRefreshToken) {
             response = await _doRefreshTokenThenRetry(request, response, body);
+          } else if (isJustDoRefetch) {
+            response = await _doReFetch(request, response, body);
           }
 
           if (await _middlewareResponseOption?.condition(request, response) ??
@@ -295,6 +303,12 @@ class MorphemeHttp {
       BaseRequest request, Response response, Object? body) async {
     await _sendRefreshToken(_refreshTokenOption!);
 
+    return _doReFetch(request, response, body);
+  }
+
+  /// Do re fetch with given [request], previous [response] and previous [body].
+  Future<Response> _doReFetch(
+      BaseRequest request, Response response, Object? body) async {
     final copyRequest = _copyRequest(request);
     return _fetch(copyRequest, body);
   }
@@ -460,9 +474,18 @@ class MorphemeHttp {
           method: 'POST', files: files, headers: newHeaders, body: body);
       Response response = await _fetch(request, body);
 
+      final isDoRefreshToken =
+          await _refreshTokenOption?.condition(request, response) ?? false;
+      final isJustDoRefetch = await _refreshTokenOption
+              ?.conditionReFetchWithoutRefreshToken
+              ?.call(request, response) ??
+          false;
+
       // do refresh token if condition is true
-      if (await _refreshTokenOption?.condition(request, response) ?? false) {
+      if (isDoRefreshToken) {
         response = await _doRefreshTokenThenRetry(request, response, body);
+      } else if (isJustDoRefetch) {
+        response = await _doReFetch(request, response, body);
       }
 
       if (await _middlewareResponseOption?.condition(request, response) ??
@@ -501,9 +524,18 @@ class MorphemeHttp {
           method: 'PATCH', files: files, headers: newHeaders, body: body);
       Response response = await _fetch(request, body);
 
+      final isDoRefreshToken =
+          await _refreshTokenOption?.condition(request, response) ?? false;
+      final isJustDoRefetch = await _refreshTokenOption
+              ?.conditionReFetchWithoutRefreshToken
+              ?.call(request, response) ??
+          false;
+
       // do refresh token if condition is true
-      if (await _refreshTokenOption?.condition(request, response) ?? false) {
+      if (isDoRefreshToken) {
         response = await _doRefreshTokenThenRetry(request, response, body);
+      } else if (isJustDoRefetch) {
+        response = await _doReFetch(request, response, body);
       }
 
       if (await _middlewareResponseOption?.condition(request, response) ??

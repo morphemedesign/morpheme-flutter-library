@@ -1,3 +1,7 @@
+## 2.3.0
+
+- add condition for re fetch without refresh token in RefreshTokenOption
+
 ## 2.2.1
 
 - fix async/await in CacheStorage methods
