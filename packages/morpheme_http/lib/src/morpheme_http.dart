@@ -262,17 +262,14 @@ class MorphemeHttp {
         fetch: () async {
           Response response = await _fetch(request, body);
 
-          final isDoRefreshToken =
-              await _refreshTokenOption?.condition(request, response) ?? false;
-          final isJustDoRefetch = await _refreshTokenOption
+          // do refresh token if condition is true
+          if (await _refreshTokenOption?.condition(request, response) ??
+              false) {
+            response = await _doRefreshTokenThenRetry(request, response, body);
+          } else if (await _refreshTokenOption
                   ?.conditionReFetchWithoutRefreshToken
                   ?.call(request, response) ??
-              false;
-
-          // do refresh token if condition is true
-          if (isDoRefreshToken) {
-            response = await _doRefreshTokenThenRetry(request, response, body);
-          } else if (isJustDoRefetch) {
+              false) {
             response = await _doReFetch(request, response, body);
           }
 
@@ -474,17 +471,12 @@ class MorphemeHttp {
           method: 'POST', files: files, headers: newHeaders, body: body);
       Response response = await _fetch(request, body);
 
-      final isDoRefreshToken =
-          await _refreshTokenOption?.condition(request, response) ?? false;
-      final isJustDoRefetch = await _refreshTokenOption
-              ?.conditionReFetchWithoutRefreshToken
-              ?.call(request, response) ??
-          false;
-
       // do refresh token if condition is true
-      if (isDoRefreshToken) {
+      if (await _refreshTokenOption?.condition(request, response) ?? false) {
         response = await _doRefreshTokenThenRetry(request, response, body);
-      } else if (isJustDoRefetch) {
+      } else if (await _refreshTokenOption?.conditionReFetchWithoutRefreshToken
+              ?.call(request, response) ??
+          false) {
         response = await _doReFetch(request, response, body);
       }
 
@@ -524,17 +516,12 @@ class MorphemeHttp {
           method: 'PATCH', files: files, headers: newHeaders, body: body);
       Response response = await _fetch(request, body);
 
-      final isDoRefreshToken =
-          await _refreshTokenOption?.condition(request, response) ?? false;
-      final isJustDoRefetch = await _refreshTokenOption
-              ?.conditionReFetchWithoutRefreshToken
-              ?.call(request, response) ??
-          false;
-
       // do refresh token if condition is true
-      if (isDoRefreshToken) {
+      if (await _refreshTokenOption?.condition(request, response) ?? false) {
         response = await _doRefreshTokenThenRetry(request, response, body);
-      } else if (isJustDoRefetch) {
+      } else if (await _refreshTokenOption?.conditionReFetchWithoutRefreshToken
+              ?.call(request, response) ??
+          false) {
         response = await _doReFetch(request, response, body);
       }
 
