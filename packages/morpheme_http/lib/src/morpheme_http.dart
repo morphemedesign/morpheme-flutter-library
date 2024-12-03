@@ -4,7 +4,9 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
+import 'package:http_parser/http_parser.dart';
 import 'package:logger/logger.dart';
+import 'package:mime/mime.dart';
 import 'package:morpheme_http/src/utils/auth_token_option.dart';
 import 'package:morpheme_http/src/utils/middleware_response_option.dart';
 import 'package:morpheme_http/src/utils/refresh_token_option.dart';
@@ -433,14 +435,22 @@ class MorphemeHttp {
     final keys = files?.keys ?? [];
     for (var key in keys) {
       for (var file in files?[key] ?? []) {
-        final multipartFile =
-            await MultipartFile.fromPath(key, file?.path ?? '');
+        final path = file?.path ?? '';
+        final mimeType = lookupMimeType(path);
+
+        final multipartFile = await MultipartFile.fromPath(
+          key,
+          path,
+          contentType: mimeType == null ? null : MediaType.parse(mimeType),
+        );
+
         request.files.add(multipartFile);
       }
     }
 
-    if (!(headers != null &&
-        headers.containsKey(HttpHeaders.contentTypeHeader))) {
+    if (!(headers?.keys.any((key) =>
+            key.toLowerCase() == HttpHeaders.contentTypeHeader.toLowerCase()) ??
+        false)) {
       request.headers.addAll({
         HttpHeaders.contentTypeHeader: "multipart/form-data",
       });

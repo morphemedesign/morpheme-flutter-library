@@ -1,3 +1,8 @@
+## 3.0.0
+
+- feat add default mime type for fetch multipart request
+- add dependency mime and http_parser
+
 ## 2.3.1
 
 - fix condition for re fetch without refresh token in RefreshTokenOption
