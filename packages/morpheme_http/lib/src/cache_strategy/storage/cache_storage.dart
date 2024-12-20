@@ -90,9 +90,9 @@ final class CacheStorage implements Storage {
   @override
   Future<int?> clear({String? prefix}) async {
     if (prefix == null) {
-      return await _box?.removeAllAsync();
+      return _box?.removeAll();
     } else {
-      return await queryByPrefixKey(prefix)?.removeAsync();
+      return queryByPrefixKey(prefix)?.remove();
     }
   }
 
@@ -108,7 +108,7 @@ final class CacheStorage implements Storage {
   ///   A future that completes with the number of entries removed.
   @override
   Future<int?> delete(String key) async {
-    return await queryByKey(key)?.removeAsync();
+    return queryByKey(key)?.remove();
   }
 
   /// Reads a cached entry from the ObjectBox store by its key.
@@ -123,7 +123,7 @@ final class CacheStorage implements Storage {
   ///   A future that completes with the `CacheWrapper` entity if found, or null.
   @override
   Future<CacheWrapper?> read(String key) async {
-    return await queryByKey(key)?.findFirstAsync();
+    return queryByKey(key)?.findFirst();
   }
 
   /// Writes a `CacheWrapper` entity to the ObjectBox store.
@@ -138,7 +138,7 @@ final class CacheStorage implements Storage {
   ///   A future that completes with the ID of the stored entity.
   @override
   Future<int?> write(CacheWrapper value) async {
-    return await _box?.putAsync(value);
+    return _box?.put(value);
   }
 
   /// Counts the number of cached entries in the ObjectBox store.

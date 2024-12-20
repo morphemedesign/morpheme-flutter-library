@@ -1,6 +1,6 @@
 name: morpheme_http
 description: Future-based library for making HTTP requests modified from http package.
-version: 3.0.0
+version: 3.0.1
 homepage: https://morpheme.design/
 repository: https://github.com/morphemedesign/morpheme-flutter-library/tree/main/packages/morpheme_http
 
@@ -14,8 +14,8 @@ dependencies:
 
   http: ^1.2.2
   uuid: ^4.5.1
-  equatable: ^2.0.5
-  logger: ^2.4.0
+  equatable: ^2.0.7
+  logger: ^2.5.0
   path_provider: ^2.1.5
   flat_buffers: ^23.5.26
   objectbox: ^4.0.3
@@ -29,7 +29,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
-  build_runner: ^2.4.13
+  build_runner: ^2.4.14
   objectbox_generator: ^4.0.3
 
 objectbox:

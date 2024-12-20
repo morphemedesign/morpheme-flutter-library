@@ -1,3 +1,8 @@
+## 3.0.1
+
+- store to objectbox use sync to increase performance
+- bump some depedencies
+
 ## 3.0.0
 
 - feat add default mime type for fetch multipart request
