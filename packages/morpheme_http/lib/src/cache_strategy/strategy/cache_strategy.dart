@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter/foundation.dart';
 import 'package:morpheme_http/morpheme_http.dart';
 
 abstract class CacheStrategy extends Equatable {
@@ -86,9 +85,6 @@ abstract class CacheStrategy extends Equatable {
     final cacheWrapper = await storage.read(key);
     if (cacheWrapper != null) {
       if (_isValid(cacheWrapper, keepExpiredCache, ttlValue)) {
-        if (kDebugMode) {
-          print("Fetch cache data for key $key: ${cacheWrapper.response}");
-        }
         return cacheWrapper.response;
       }
     }
