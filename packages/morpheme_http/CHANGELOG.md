@@ -1,3 +1,7 @@
+## 3.1.0
+
+- disable timeout in post multipart and patch multipart 
+
 ## 3.0.2
 
 - remove print when call invokeCache

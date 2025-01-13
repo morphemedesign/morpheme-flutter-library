@@ -193,17 +193,26 @@ class MorphemeHttp {
   }
 
   /// Sends a non-streaming [Request] and returns a non-streaming [Response].
-  Future<Response> _fetch(BaseRequest request, Object? body) async {
+  Future<Response> _fetch(
+    BaseRequest request,
+    Object? body, [
+    bool enableTimeout = true,
+  ]) async {
     final uuid = const Uuid().v4();
     _loggerRequest(request, body);
     await _inspectorRequest(uuid, request, body);
-    final streamResponse = await request.send().timeout(
-      Duration(milliseconds: _timeout),
-      onTimeout: () async {
-        await _inspectorResponseTimeout(uuid);
-        throw morpheme_exception.TimeoutException();
-      },
-    );
+    late StreamedResponse streamResponse;
+    if (enableTimeout) {
+      streamResponse = await request.send().timeout(
+        Duration(milliseconds: _timeout),
+        onTimeout: () async {
+          await _inspectorResponseTimeout(uuid);
+          throw morpheme_exception.TimeoutException();
+        },
+      );
+    } else {
+      streamResponse = await request.send();
+    }
     final response = await Response.fromStream(streamResponse);
     _loggerResponse(response);
     _inspectorResponse(uuid, response);
@@ -307,9 +316,13 @@ class MorphemeHttp {
 
   /// Do re fetch with given [request], previous [response] and previous [body].
   Future<Response> _doReFetch(
-      BaseRequest request, Response response, Object? body) async {
+    BaseRequest request,
+    Response response,
+    Object? body, [
+    bool enableTimeout = true,
+  ]) async {
     final copyRequest = _copyRequest(request);
-    return _fetch(copyRequest, body);
+    return _fetch(copyRequest, body, enableTimeout);
   }
 
   /// Sends a refresh token non-streaming [Request] and returns a non-streaming [Response],
@@ -479,7 +492,7 @@ class MorphemeHttp {
 
       final request = await _getMultiPartRequest(url,
           method: 'POST', files: files, headers: newHeaders, body: body);
-      Response response = await _fetch(request, body);
+      Response response = await _fetch(request, body, false);
 
       // do refresh token if condition is true
       if (await _refreshTokenOption?.condition(request, response) ?? false) {
@@ -487,7 +500,7 @@ class MorphemeHttp {
       } else if (await _refreshTokenOption?.conditionReFetchWithoutRefreshToken
               ?.call(request, response) ??
           false) {
-        response = await _doReFetch(request, response, body);
+        response = await _doReFetch(request, response, body, false);
       }
 
       if (await _middlewareResponseOption?.condition(request, response) ??
@@ -524,7 +537,7 @@ class MorphemeHttp {
 
       final request = await _getMultiPartRequest(url,
           method: 'PATCH', files: files, headers: newHeaders, body: body);
-      Response response = await _fetch(request, body);
+      Response response = await _fetch(request, body, false);
 
       // do refresh token if condition is true
       if (await _refreshTokenOption?.condition(request, response) ?? false) {
@@ -532,7 +545,7 @@ class MorphemeHttp {
       } else if (await _refreshTokenOption?.conditionReFetchWithoutRefreshToken
               ?.call(request, response) ??
           false) {
-        response = await _doReFetch(request, response, body);
+        response = await _doReFetch(request, response, body, false);
       }
 
       if (await _middlewareResponseOption?.condition(request, response) ??
