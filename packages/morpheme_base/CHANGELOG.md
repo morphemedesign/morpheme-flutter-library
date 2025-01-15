@@ -1,3 +1,8 @@
+## 2.0.0
+
+- upgrade bloc to 9.0.0
+- refactor import statements in morpheme_base.dart and morpheme_cubit.dart
+
 ## 1.2.1
 
 - bump flutter_bloc to 8.1.6 

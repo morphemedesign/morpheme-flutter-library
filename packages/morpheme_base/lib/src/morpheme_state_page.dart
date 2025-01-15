@@ -82,6 +82,13 @@ mixin MorphemeStatePage<T extends StatefulWidget, C extends MorphemeCubit>
     super.dispose();
   }
 
+  /// Call [setState] if [mounted] is true.
+  @override
+  void setState(VoidCallback fn) {
+    if (!mounted) return;
+    super.setState(fn);
+  }
+
   /// Replace build [StatefulWidget] with [buildWidget]
   ///
   /// Create [MultiBlocProvider] for [Cubit] and [Bloc]
