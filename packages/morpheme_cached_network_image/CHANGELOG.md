@@ -1,3 +1,7 @@
+## 2.1.0
+
+- component morpheme cached network image support for web
+
 ## 2.0.0
 
 - bump flutter version minimal 3.24.0

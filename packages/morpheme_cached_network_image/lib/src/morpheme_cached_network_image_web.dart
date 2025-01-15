@@ -3,9 +3,10 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:morpheme_cached_network_image/src/cached_manager/morpheme_cached_network_image_manager.dart';
 
-export 'package:morpheme_cached_network_image/src/cached_manager/morpheme_cached_network_image_manager.dart';
+import 'cached_manager/morpheme_cached_network_image_manager_web.dart';
+
+export 'cached_manager/morpheme_cached_network_image_manager_web.dart';
 
 class MorphemeCachedNetworkImage extends StatefulWidget {
   const MorphemeCachedNetworkImage({
