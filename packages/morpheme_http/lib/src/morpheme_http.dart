@@ -321,7 +321,7 @@ class MorphemeHttp {
     Object? body, [
     bool enableTimeout = true,
   ]) async {
-    final copyRequest = _copyRequest(request);
+    final copyRequest = await _copyRequest(request);
     return _fetch(copyRequest, body, enableTimeout);
   }
 
@@ -564,7 +564,7 @@ class MorphemeHttp {
   }
 
   /// Returns a copy of [request].
-  BaseRequest _copyRequest(BaseRequest request) {
+  Future<BaseRequest> _copyRequest(BaseRequest request) async {
     BaseRequest requestCopy;
 
     if (request is Request) {
@@ -580,6 +580,12 @@ class MorphemeHttp {
     } else {
       throw Exception('request type is unknown, cannot copy');
     }
+
+    final mapEntityToken =
+        await _authTokenOption?.getMapEntryToken(request.url);
+    request.headers.addAll({
+      if (mapEntityToken != null) mapEntityToken.key: mapEntityToken.value,
+    });
 
     requestCopy
       ..persistentConnection = request.persistentConnection

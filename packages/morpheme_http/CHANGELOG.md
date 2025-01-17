@@ -1,3 +1,7 @@
+## 3.1.1
+
+- fix _copyRequest method to include mapEntityToken in headers
+
 ## 3.1.0
 
 - disable timeout in post multipart and patch multipart 
