@@ -167,11 +167,25 @@ class MorphemeHttp {
   /// Handle [response] http for [MorphemeInspector].
   Future<void> _inspectorResponse(String uuid, Response response) async {
     Object? body;
-    try {
-      body = json.decode(response.body);
-    } catch (e) {
-      body = response.body;
+    final contentType = response.headers.entries
+        .firstWhere(
+          (entry) => entry.key.toLowerCase() == 'content-type',
+          orElse: () => const MapEntry('', ''),
+        )
+        .value
+        .toLowerCase();
+
+    if (contentType.contains(RegExp(
+        r'application/(octet-stream|pdf|zip|xml|x-www-form-urlencoded|javascript|html|css|jpeg|png|gif|bmp|webp|svg\+xml)'))) {
+      body = 'Binary data';
+    } else {
+      try {
+        body = json.decode(response.body);
+      } catch (e) {
+        body = response.body;
+      }
     }
+
     await _morphemeInspector?.inspectorResponse(
       uuid,
       ResponseInspector(
@@ -350,6 +364,19 @@ class MorphemeHttp {
         );
       }
     }
+  }
+
+  Future<Response> head(
+    Uri url, {
+    Map<String, String>? headers,
+    CacheStrategy? cacheStrategy,
+  }) async {
+    return _sendUnstreamed(
+      'HEAD',
+      url,
+      headers,
+      cacheStrategy ?? JustAsyncStrategy(),
+    );
   }
 
   Future<Response> get(

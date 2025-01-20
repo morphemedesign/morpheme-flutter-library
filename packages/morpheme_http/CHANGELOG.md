@@ -1,3 +1,8 @@
+## 3.2.0
+
+- Add support for HEAD requests
+- handle inspector to ignore add file to insert sqflite
+
 ## 3.1.1
 
 - fix _copyRequest method to include mapEntityToken in headers
