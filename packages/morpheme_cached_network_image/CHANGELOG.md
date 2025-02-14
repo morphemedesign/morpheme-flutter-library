@@ -1,3 +1,8 @@
+## 3.0.0
+
+- minimum flutter 3.29
+- update webHtmlElementStrategy
+
 ## 2.1.0
 
 - component morpheme cached network image support for web
