@@ -1,3 +1,7 @@
+## 3.2.1
+
+- update getMapEntryToken to match against the full URL string
+
 ## 3.2.0
 
 - Add support for HEAD requests

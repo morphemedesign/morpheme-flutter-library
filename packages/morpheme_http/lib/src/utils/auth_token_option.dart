@@ -63,7 +63,7 @@ extension AuthTokenOptionExtension on AuthTokenOption {
   ///
   Future<MapEntry?> getMapEntryToken(Uri url) async {
     if (excludeEndpointUsageToken
-            ?.where((element) => element.hasMatch(url.path))
+            ?.where((element) => element.hasMatch(url.toString()))
             .isNotEmpty ??
         true) {
       return null;
