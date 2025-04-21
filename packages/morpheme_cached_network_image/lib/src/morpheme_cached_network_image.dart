@@ -32,6 +32,8 @@ class MorphemeCachedNetworkImage extends StatefulWidget {
     this.isAntiAlias = false,
     this.cacheWidth,
     this.cacheHeight,
+    this.fadeTransition = true,
+    this.fadeTransitionDuration = const Duration(milliseconds: 300),
   });
 
   final String imageUrl;
@@ -331,13 +333,31 @@ class MorphemeCachedNetworkImage extends StatefulWidget {
   final int? cacheWidth;
   final int? cacheHeight;
 
+  /// Whether to apply a fade transition when the image is loaded.
+  ///
+  /// When set to true, the image will fade in smoothly once it's loaded from the network
+  /// or cache. This creates a more polished user experience by avoiding sudden image appearance.
+  /// If false, the image will appear immediately without any transition effect.
+  ///
+  /// Defaults to true.
+  final bool fadeTransition;
+
+  /// The duration of the fade transition animation when [fadeTransition] is true.
+  ///
+  /// This duration controls how long it takes for the image to fade in once it's loaded.
+  /// A longer duration will result in a slower, more gradual fade effect, while a shorter
+  /// duration will make the transition quicker.
+  ///
+  /// This parameter is only used when [fadeTransition] is true.
+  ///
+  /// Defaults to 300 milliseconds.
+  final Duration fadeTransitionDuration;
+
   @override
-  State<MorphemeCachedNetworkImage> createState() =>
-      _MorphemeCachedNetworkImageState();
+  State<MorphemeCachedNetworkImage> createState() => _MorphemeCachedNetworkImageState();
 }
 
-class _MorphemeCachedNetworkImageState
-    extends State<MorphemeCachedNetworkImage> {
+class _MorphemeCachedNetworkImageState extends State<MorphemeCachedNetworkImage> {
   Uint8List? image;
   Object? error;
 
@@ -376,6 +396,17 @@ class _MorphemeCachedNetworkImageState
 
   @override
   Widget build(BuildContext context) {
+    if (widget.fadeTransition) {
+      return AnimatedSwitcher(
+        transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
+        duration: widget.fadeTransitionDuration,
+        child: _buildWidget(),
+      );
+    }
+    return _buildWidget();
+  }
+
+  Widget _buildWidget() {
     if (image == null && error != null) {
       return widget.errorBuilder?.call(context, error!, null) ??
           Container(
@@ -396,12 +427,8 @@ class _MorphemeCachedNetworkImageState
       height: widget.height,
       child: LayoutBuilder(
         builder: (context, constraints) {
-          int? cacheWidth = widget.cacheWidth ??
-              cacheSize(context, constraints.maxWidth) ??
-              0;
-          int? cacheHeight = widget.cacheHeight ??
-              cacheSize(context, constraints.maxHeight) ??
-              0;
+          int? cacheWidth = widget.cacheWidth ?? cacheSize(context, constraints.maxWidth) ?? 0;
+          int? cacheHeight = widget.cacheHeight ?? cacheSize(context, constraints.maxHeight) ?? 0;
 
           final aspectRatio = cacheWidth / cacheHeight;
 
@@ -444,10 +471,8 @@ class _MorphemeCachedNetworkImageState
 }
 
 @immutable
-class MorphemeCachedNetworkImageProvider extends ImageProvider<NetworkImage>
-    implements NetworkImage {
-  const MorphemeCachedNetworkImageProvider(this.url,
-      {this.scale = 1.0, this.headers});
+class MorphemeCachedNetworkImageProvider extends ImageProvider<NetworkImage> implements NetworkImage {
+  const MorphemeCachedNetworkImageProvider(this.url, {this.scale = 1.0, this.headers});
 
   @override
   final String url;
@@ -459,20 +484,16 @@ class MorphemeCachedNetworkImageProvider extends ImageProvider<NetworkImage>
   final Map<String, String>? headers;
 
   @override
-  Future<MorphemeCachedNetworkImageProvider> obtainKey(
-      ImageConfiguration configuration) {
+  Future<MorphemeCachedNetworkImageProvider> obtainKey(ImageConfiguration configuration) {
     return SynchronousFuture<MorphemeCachedNetworkImageProvider>(this);
   }
 
   @override
-  ImageStreamCompleter loadImage(
-      NetworkImage key, ImageDecoderCallback decode) {
-    final StreamController<ImageChunkEvent> chunkEvents =
-        StreamController<ImageChunkEvent>();
+  ImageStreamCompleter loadImage(NetworkImage key, ImageDecoderCallback decode) {
+    final StreamController<ImageChunkEvent> chunkEvents = StreamController<ImageChunkEvent>();
 
     return MultiFrameImageStreamCompleter(
-      codec: _cachedOrAsync(
-          key as MorphemeCachedNetworkImageProvider, chunkEvents, decode),
+      codec: _cachedOrAsync(key as MorphemeCachedNetworkImageProvider, chunkEvents, decode),
       chunkEvents: chunkEvents.stream,
       scale: key.scale,
       debugLabel: key.url,
@@ -490,11 +511,9 @@ class MorphemeCachedNetworkImageProvider extends ImageProvider<NetworkImage>
   ) async {
     try {
       assert(key == this);
-      final image =
-          await MorphemeCachedNetworkImageManager().cachedOrAsyncProvider(url);
+      final image = await MorphemeCachedNetworkImageManager().cachedOrAsyncProvider(url);
 
-      final ui.ImmutableBuffer buffer =
-          await ui.ImmutableBuffer.fromUint8List(image!);
+      final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(image!);
       return decode(buffer);
     } catch (e) {
       scheduleMicrotask(() {
@@ -511,21 +530,17 @@ class MorphemeCachedNetworkImageProvider extends ImageProvider<NetworkImage>
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is MorphemeCachedNetworkImageProvider &&
-        other.url == url &&
-        other.scale == scale;
+    return other is MorphemeCachedNetworkImageProvider && other.url == url && other.scale == scale;
   }
 
   @override
   int get hashCode => Object.hash(url, scale);
 
   @override
-  String toString() =>
-      '${objectRuntimeType(this, 'NetworkImage')}("$url", scale: $scale)';
+  String toString() => '${objectRuntimeType(this, 'NetworkImage')}("$url", scale: $scale)';
 
   @override
-  WebHtmlElementStrategy get webHtmlElementStrategy =>
-      WebHtmlElementStrategy.never;
+  WebHtmlElementStrategy get webHtmlElementStrategy => WebHtmlElementStrategy.never;
 }
 
 class _ShimmerEffect extends StatefulWidget {
@@ -541,8 +556,7 @@ class _ShimmerEffect extends StatefulWidget {
   _ShimmerEffectState createState() => _ShimmerEffectState();
 }
 
-class _ShimmerEffectState extends State<_ShimmerEffect>
-    with SingleTickerProviderStateMixin {
+class _ShimmerEffectState extends State<_ShimmerEffect> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
   @override
