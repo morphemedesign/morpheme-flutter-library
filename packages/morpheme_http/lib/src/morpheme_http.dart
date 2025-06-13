@@ -463,6 +463,115 @@ class MorphemeHttp {
         encoding: encoding,
       );
 
+  Stream<String> _doStream(
+    String method,
+    Uri url,
+    Map<String, String>? headers, {
+    Object? body,
+    Encoding? encoding,
+  }) async* {
+    try {
+      final newHeaders = await _putIfAbsentHeader(url, headers);
+      final request = _getRequest(method, url, newHeaders, body, encoding);
+
+      final uuid = const Uuid().v4();
+      _loggerRequest(request, body);
+      await _inspectorRequest(uuid, request, body);
+
+      final streamResponse = await request.send();
+      final stream = streamResponse.stream.transform(utf8.decoder);
+
+      final response = Response.bytes(
+        await streamResponse.stream.toBytes(),
+        streamResponse.statusCode,
+        request: streamResponse.request,
+        headers: streamResponse.headers,
+        isRedirect: streamResponse.isRedirect,
+        persistentConnection: streamResponse.persistentConnection,
+        reasonPhrase: streamResponse.reasonPhrase,
+      );
+
+      if (await _middlewareResponseOption?.condition(request, response) ??
+          false) {
+        await _middlewareResponseOption?.onResponse(response);
+      }
+
+      _handleErrorResponse(response);
+
+      await _authTokenOption?.handleConditionAuthTokenOption(request, response);
+
+      String buffer = '';
+      await for (var chunk in stream) {
+        buffer += chunk;
+
+        // misalnya format SSE: pisahkan per blok event
+        final events = buffer.split('\n\n');
+        buffer = events.removeLast(); // sisa event belum lengkap
+
+        for (final event in events) {
+          for (final line in event.split('\n')) {
+            if (line.startsWith('data:')) {
+              final data = line.substring(5).trim();
+              final response = Response(
+                data,
+                streamResponse.statusCode,
+                request: streamResponse.request,
+                headers: streamResponse.headers,
+                isRedirect: streamResponse.isRedirect,
+                persistentConnection: streamResponse.persistentConnection,
+                reasonPhrase: streamResponse.reasonPhrase,
+              );
+              _loggerResponse(response);
+              yield data;
+            }
+          }
+        }
+      }
+
+      await _inspectorResponse(
+          uuid,
+          Response(
+            buffer,
+            streamResponse.statusCode,
+            request: streamResponse.request,
+            headers: streamResponse.headers,
+            isRedirect: streamResponse.isRedirect,
+            persistentConnection: streamResponse.persistentConnection,
+            reasonPhrase: streamResponse.reasonPhrase,
+          ));
+    } on SocketException {
+      throw morpheme_exception.NoInternetException();
+    } catch (e, stackTrace) {
+      _onErrorResponse?.call(e, stackTrace);
+      rethrow;
+    }
+  }
+
+  Stream<String> postStream(
+    Uri url, {
+    Map<String, String>? headers,
+    Object? body,
+    Encoding? encoding,
+  }) =>
+      _doStream('POST', url, headers, body: body);
+
+  Stream<String> getStream(
+    Uri url, {
+    Map<String, String>? headers,
+    Map<String, dynamic>? body,
+    Encoding? encoding,
+  }) async* {
+    Map<String, String>? queryParameters = body?.map(
+      (key, value) => MapEntry(key, value.toString()),
+    );
+
+    final urlWithBody = queryParameters?.isNotEmpty ?? false
+        ? url.replace(queryParameters: queryParameters)
+        : url;
+
+    yield* _doStream('GET', urlWithBody, headers);
+  }
+
   /// Return [MultipartRequest] with given [url], [files], [headers], and [body].
   Future<MultipartRequest> _getMultiPartRequest(
     Uri url, {
