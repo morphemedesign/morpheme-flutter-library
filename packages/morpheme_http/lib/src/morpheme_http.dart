@@ -510,7 +510,6 @@ class MorphemeHttp {
       String buffer =
           ''; // Hanya sisa data dari chunk terakhir (biasanya 1 event partial)
       String fullRawData = ''; // untuk menyimpan data lengkap dari stream
-      bool isClosed = false;
 
       stream.listen(
         (chunk) {
@@ -538,20 +537,6 @@ class MorphemeHttp {
             }
           }
         },
-        onDone: () {
-          if (!isClosed) {
-            isClosed = true;
-            controller.close();
-          }
-        },
-        onError: (error, stackTrace) {
-          if (!isClosed) {
-            isClosed = true;
-            controller.addError(error, stackTrace);
-            controller.close();
-          }
-        },
-        cancelOnError: true,
       );
 
       yield* controller.stream;
