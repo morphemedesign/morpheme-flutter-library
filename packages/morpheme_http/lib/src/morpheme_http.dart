@@ -467,6 +467,10 @@ class MorphemeHttp {
     String method,
     Uri url,
     Map<String, String>? headers, {
+    String splitBuffer = '\n\n',
+    String splitEvent = '\n',
+    String dataStartWith = 'data:',
+    int substringData = 5,
     Object? body,
     Encoding? encoding,
   }) async* {
@@ -512,13 +516,13 @@ class MorphemeHttp {
         fullRawData += chunk;
 
         // misalnya format SSE: pisahkan per blok event
-        final events = buffer.split('\n\n');
+        final events = buffer.split(splitBuffer);
         buffer = events.removeLast(); // sisa event belum lengkap
 
         for (final event in events) {
-          for (final line in event.split('\n')) {
-            if (line.startsWith('data:')) {
-              final data = line.substring(5).trim();
+          for (final line in event.split(splitEvent)) {
+            if (line.startsWith(dataStartWith)) {
+              final data = line.substring(substringData).trim();
               _loggerResponse(Response(
                 data,
                 streamResponse.statusCode,
