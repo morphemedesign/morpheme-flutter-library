@@ -1,3 +1,7 @@
+## 3.1.0
+
+- add fade transition (thanks to [AnasQasem](https://github.com/AnasQasem))
+
 ## 3.0.0
 
 - minimum flutter 3.29
