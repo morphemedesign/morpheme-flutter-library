@@ -463,6 +463,125 @@ class MorphemeHttp {
         encoding: encoding,
       );
 
+  Stream<String> _doStreamSse(
+    String method,
+    Uri url,
+    Map<String, String>? headers, {
+    String splitBuffer = '\n\n',
+    String splitEvent = '\n',
+    String dataStartWith = 'data:',
+    int substringData = 5,
+    Object? body,
+    Encoding? encoding,
+  }) async* {
+    try {
+      final newHeaders = await _putIfAbsentHeader(url, headers);
+      final request = _getRequest(method, url, newHeaders, body, encoding);
+
+      final uuid = const Uuid().v4();
+      _loggerRequest(request, body);
+      await _inspectorRequest(uuid, request, body);
+
+      final streamResponse = await request.send();
+      final stream = streamResponse.stream.transform(utf8.decoder);
+
+      // ini kenapa kosong, karena untuk handling header awalan saja di sse
+      // kenapa tidak ambil dari bodynya/bytes streamResponse.stream.toBytes(), karena varibale streamResponse.stream
+      // hanya bisa diakses sekali saja, nanti akan ada error Stream has already been listened to.
+
+      final response = Response.bytes(
+        utf8.encode('{}'),
+        streamResponse.statusCode,
+        request: streamResponse.request,
+        headers: streamResponse.headers,
+        isRedirect: streamResponse.isRedirect,
+        persistentConnection: streamResponse.persistentConnection,
+        reasonPhrase: streamResponse.reasonPhrase,
+      );
+
+      if (await _middlewareResponseOption?.condition(request, response) ??
+          false) {
+        await _middlewareResponseOption?.onResponse(response);
+      }
+
+      _handleErrorResponse(response);
+      await _authTokenOption?.handleConditionAuthTokenOption(request, response);
+
+      String buffer =
+          ''; // Hanya sisa data dari chunk terakhir (biasanya 1 event partial)
+      String fullRawData = ''; // untuk menyimpan data lengkap dari stream
+
+      await for (var chunk in stream) {
+        buffer += chunk;
+        fullRawData += chunk;
+
+        // misalnya format SSE: pisahkan per blok event
+        final events = buffer.split(splitBuffer);
+        buffer = events.removeLast(); // sisa event belum lengkap
+
+        for (final event in events) {
+          for (final line in event.split(splitEvent)) {
+            if (line.startsWith(dataStartWith)) {
+              final data = line.substring(substringData).trim();
+              _loggerResponse(Response(
+                data,
+                streamResponse.statusCode,
+                request: streamResponse.request,
+                headers: streamResponse.headers,
+                isRedirect: streamResponse.isRedirect,
+                persistentConnection: streamResponse.persistentConnection,
+                reasonPhrase: streamResponse.reasonPhrase,
+              ));
+              yield data;
+            }
+          }
+        }
+      }
+
+      await _inspectorResponse(
+          uuid,
+          Response(
+            fullRawData,
+            streamResponse.statusCode,
+            request: streamResponse.request,
+            headers: streamResponse.headers,
+            isRedirect: streamResponse.isRedirect,
+            persistentConnection: streamResponse.persistentConnection,
+            reasonPhrase: streamResponse.reasonPhrase,
+          ));
+    } on SocketException {
+      throw morpheme_exception.NoInternetException();
+    } catch (e, stackTrace) {
+      _onErrorResponse?.call(e, stackTrace);
+      rethrow;
+    }
+  }
+
+  Stream<String> postSse(
+    Uri url, {
+    Map<String, String>? headers,
+    Object? body,
+    Encoding? encoding,
+  }) =>
+      _doStreamSse('POST', url, headers, body: body);
+
+  Stream<String> getSse(
+    Uri url, {
+    Map<String, String>? headers,
+    Map<String, dynamic>? body,
+    Encoding? encoding,
+  }) async* {
+    Map<String, String>? queryParameters = body?.map(
+      (key, value) => MapEntry(key, value.toString()),
+    );
+
+    final urlWithBody = queryParameters?.isNotEmpty ?? false
+        ? url.replace(queryParameters: queryParameters)
+        : url;
+
+    yield* _doStreamSse('GET', urlWithBody, headers);
+  }
+
   /// Return [MultipartRequest] with given [url], [files], [headers], and [body].
   Future<MultipartRequest> _getMultiPartRequest(
     Uri url, {
