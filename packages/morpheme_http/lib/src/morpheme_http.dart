@@ -463,6 +463,22 @@ class MorphemeHttp {
         encoding: encoding,
       );
 
+  /// Sends a Server-Sent Events (SSE) stream request and returns a stream of [String].
+  ///
+  /// The [splitBuffer] parameter is used to split the buffer into separate events,
+  /// the [splitEvent] parameter is used to split each event into lines,
+  /// the [dataStartWith] parameter is used to identify the start of the data in each line,
+  /// the [substringData] parameter is used to get the actual data from the line.
+  /// Args:
+  ///   - [method] (String): The HTTP method to use for the request (e.g., 'GET', 'POST').
+  ///   - [url] (Uri): The URL to send the request to.
+  ///   - [headers] (Map<String, String>?): Optional headers to include in the request.
+  ///   - [splitBuffer] (String): The string used to split the buffer into separate events.
+  ///   - [splitEvent] (String): The string used to split each event into lines.
+  ///   - [dataStartWith] (String): The string that indicates the start of the data in each line.
+  ///   - [substringData] (int): The number of characters to skip at the start of the data line.
+  /// Returns:
+  ///   A [Stream<String>] that emits the data from each event as a string.
   Stream<String> _doStreamSse(
     String method,
     Uri url,
@@ -557,14 +573,18 @@ class MorphemeHttp {
     }
   }
 
-  Stream<String> postSse(
-    Uri url, {
-    Map<String, String>? headers,
-    Object? body,
-    Encoding? encoding,
-  }) =>
-      _doStreamSse('POST', url, headers, body: body);
-
+  /// Sends a Server-Sent Events (SSE) stream request with the HTTP GET method
+  /// and returns a stream of [String].
+  /// Args:
+  /// - [url] (Uri): The URL to send the request to.
+  /// - [headers] (Map<String, String>?): Optional headers to include in the request.
+  /// - [body] (Map<String, dynamic>?): The body of the request, which can be a Map of query parameters.
+  /// - [encoding] (Encoding?): The encoding to use for the request body.
+  /// Returns:
+  /// A [Stream<String>] that emits the data from each event as a string.
+  /// If the request fails, it will throw a [NoInternetException] if there is no internet connection,
+  /// or call the provided [onErrorResponse] callback with the error and stack trace.
+  /// If the request is successful, it will yield the data from each event as a string.
   Stream<String> getSse(
     Uri url, {
     Map<String, String>? headers,
@@ -581,6 +601,86 @@ class MorphemeHttp {
 
     yield* _doStreamSse('GET', urlWithBody, headers);
   }
+
+  /// Sends a Server-Sent Events (SSE) stream request with the HTTP POST method
+  /// and returns a stream of [String].
+  /// Args:
+  /// - [url] (Uri): The URL to send the request to.
+  /// - [headers] (Map<String, String>?): Optional headers to include in the request.
+  /// - [body] (Object?): The body of the request, which can be a String, List, or Map.
+  /// - [encoding] (Encoding?): The encoding to use for the request body.
+  /// Returns:
+  /// A [Stream<String>] that emits the data from each event as a string.
+  /// If the request fails, it will throw a [NoInternetException] if there is no internet connection,
+  /// or call the provided [onErrorResponse] callback with the error and stack trace.
+  /// If the request is successful, it will yield the data from each event as a string.
+  Stream<String> postSse(
+    Uri url, {
+    Map<String, String>? headers,
+    Object? body,
+    Encoding? encoding,
+  }) =>
+      _doStreamSse('POST', url, headers, body: body);
+
+  /// Sends a Server-Sent Events (SSE) stream request with the HTTP PUT method
+  /// and returns a stream of [String].
+  /// Args:
+  /// - [url] (Uri): The URL to send the request to.
+  /// - [headers] (Map<String, String>?): Optional headers to include in the request.
+  /// - [body] (Object?): The body of the request, which can be a String, List, or Map.
+  /// - [encoding] (Encoding?): The encoding to use for the request body.
+  /// Returns:
+  /// A [Stream<String>] that emits the data from each event as a string.
+  /// If the request fails, it will throw a [NoInternetException] if there is no internet connection,
+  /// or call the provided [onErrorResponse] callback with the error and stack trace.
+  /// If the request is successful, it will yield the data from each event as a string.
+  Stream<String> putSse(
+    Uri url, {
+    Map<String, String>? headers,
+    Object? body,
+    Encoding? encoding,
+  }) =>
+      _doStreamSse('PUT', url, headers, body: body);
+
+  /// Sends a Server-Sent Events (SSE) stream request with the HTTP PATCH method
+  /// and returns a stream of [String].
+  /// Args:
+  /// - [url] (Uri): The URL to send the request to.
+  /// - [headers] (Map<String, String>?): Optional headers to include in the request.
+  /// - [body] (Object?): The body of the request, which can be a String, List, or Map.
+  /// - [encoding] (Encoding?): The encoding to use for the request body.
+  /// Returns:
+  /// A [Stream<String>] that emits the data from each event as a string.
+  /// If the request fails, it will throw a [NoInternetException] if there is no internet connection,
+  /// or call the provided [onErrorResponse] callback with the error and stack trace.
+  /// If the request is successful, it will yield the data from each event as a string.
+  Stream<String> patchSse(
+    Uri url, {
+    Map<String, String>? headers,
+    Object? body,
+    Encoding? encoding,
+  }) =>
+      _doStreamSse('PATCH', url, headers, body: body);
+
+  /// Sends a Server-Sent Events (SSE) stream request with the HTTP DELETE method
+  /// and returns a stream of [String].
+  /// Args:
+  /// - [url] (Uri): The URL to send the request to.
+  /// - [headers] (Map<String, String>?): Optional headers to include in the request.
+  /// - [body] (Object?): The body of the request, which can be a String, List, or Map.
+  /// - [encoding] (Encoding?): The encoding to use for the request body.
+  /// Returns:
+  /// A [Stream<String>] that emits the data from each event as a string.
+  /// If the request fails, it will throw a [NoInternetException] if there is no internet connection,
+  /// or call the provided [onErrorResponse] callback with the error and stack trace.
+  /// If the request is successful, it will yield the data from each event as a string.
+  Stream<String> deleteSse(
+    Uri url, {
+    Map<String, String>? headers,
+    Object? body,
+    Encoding? encoding,
+  }) =>
+      _doStreamSse('DELETE', url, headers, body: body);
 
   /// Return [MultipartRequest] with given [url], [files], [headers], and [body].
   Future<MultipartRequest> _getMultiPartRequest(

@@ -1,3 +1,7 @@
+## 3.3.0
+
+- add SSE (Server-Sent Events) stream methods for HTTP methods GET, POST, PUT, PATCH, and DELETE (thanks to [yusupmdl](https://github.com/yusupmdl])
+
 ## 3.2.1
 
 - update getMapEntryToken to match against the full URL string
