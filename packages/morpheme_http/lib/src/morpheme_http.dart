@@ -463,7 +463,7 @@ class MorphemeHttp {
         encoding: encoding,
       );
 
-  Stream<String> _doStream(
+  Stream<String> _doStreamSse(
     String method,
     Uri url,
     Map<String, String>? headers, {
@@ -557,15 +557,15 @@ class MorphemeHttp {
     }
   }
 
-  Stream<String> postStream(
+  Stream<String> postSse(
     Uri url, {
     Map<String, String>? headers,
     Object? body,
     Encoding? encoding,
   }) =>
-      _doStream('POST', url, headers, body: body);
+      _doStreamSse('POST', url, headers, body: body);
 
-  Stream<String> getStream(
+  Stream<String> getSse(
     Uri url, {
     Map<String, String>? headers,
     Map<String, dynamic>? body,
@@ -579,7 +579,7 @@ class MorphemeHttp {
         ? url.replace(queryParameters: queryParameters)
         : url;
 
-    yield* _doStream('GET', urlWithBody, headers);
+    yield* _doStreamSse('GET', urlWithBody, headers);
   }
 
   /// Return [MultipartRequest] with given [url], [files], [headers], and [body].
