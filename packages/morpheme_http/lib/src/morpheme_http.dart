@@ -17,8 +17,13 @@ import 'package:uuid/uuid.dart';
 import 'cache_strategy/cache_strategy.dart';
 import 'errors/morpheme_exceptions.dart' as morpheme_exception;
 
+/// Callback function for progress updates during HTTP requests.
 typedef CallbackProgressHttp = void Function(
     int received, int totalContentLength);
+
+/// Callback function for handling error responses.
+typedef CallbackErrorResponse = void Function(
+    BaseRequest request, Response response);
 
 /// The base class for an HTTP client.
 class MorphemeHttp {
@@ -30,7 +35,7 @@ class MorphemeHttp {
     AuthTokenOption? authTokenOption,
     RefreshTokenOption? refreshTokenOption,
     MiddlewareResponseOption? middlewareResponseOption,
-    void Function(Object error, StackTrace stackTrace)? onErrorResponse,
+    CallbackErrorResponse? onErrorResponse,
   })  : _timeout = timeout,
         _morphemeInspector = morphemeInspector,
         _showLog = showLog,
@@ -75,9 +80,11 @@ class MorphemeHttp {
   /// Option to handle middleware response.
   final MiddlewareResponseOption? _middlewareResponseOption;
 
+  /// The storage used for caching responses.
   final Storage _storage;
 
-  final void Function(Object error, StackTrace stackTrace)? _onErrorResponse;
+  /// The callback function to handle error responses.
+  final CallbackErrorResponse? _onErrorResponse;
 
   /// Return new headers with given [url] and old [headers],
   /// include set authorization.
@@ -258,6 +265,7 @@ class MorphemeHttp {
     return request;
   }
 
+  /// Generate a unique key for caching based on the request method, URL, headers, and body.
   String _getKeyCache({
     required String method,
     required Uri url,
@@ -307,14 +315,13 @@ class MorphemeHttp {
         },
       );
 
-      _handleErrorResponse(response);
+      _handleErrorResponse(request, response);
 
       await _authTokenOption?.handleConditionAuthTokenOption(request, response);
       return response;
     } on SocketException {
       throw morpheme_exception.NoInternetException();
-    } catch (e, stackTrace) {
-      _onErrorResponse?.call(e, stackTrace);
+    } catch (_, __) {
       rethrow;
     }
   }
@@ -366,6 +373,10 @@ class MorphemeHttp {
     }
   }
 
+  /// Handle error response from [request] and [response].
+  /// If the response status code is not 2xx,
+  /// it will throw an exception or call the [onErrorResponse] callback.
+  /// If the response status code is 2xx, it will return normally.
   Future<Response> head(
     Uri url, {
     Map<String, String>? headers,
@@ -379,6 +390,7 @@ class MorphemeHttp {
     );
   }
 
+  /// Sends a non-streaming [Request] with the HTTP GET method and returns a non-streaming [Response].
   Future<Response> get(
     Uri url, {
     Map<String, String>? headers,
@@ -399,6 +411,7 @@ class MorphemeHttp {
     );
   }
 
+  /// Sends a non-streaming [Request] with the HTTP POST method and returns a non-streaming [Response].
   Future<Response> post(
     Uri url, {
     Map<String, String>? headers,
@@ -415,6 +428,7 @@ class MorphemeHttp {
         encoding: encoding,
       );
 
+  /// Sends a non-streaming [Request] with the HTTP PUT method and returns a non-streaming [Response].
   Future<Response> put(
     Uri url, {
     Map<String, String>? headers,
@@ -431,6 +445,7 @@ class MorphemeHttp {
         encoding: encoding,
       );
 
+  /// Sends a non-streaming [Request] with the HTTP PATCH method and returns a non-streaming [Response].
   Future<Response> patch(
     Uri url, {
     Map<String, String>? headers,
@@ -447,6 +462,7 @@ class MorphemeHttp {
         encoding: encoding,
       );
 
+  /// Sends a non-streaming [Request] with the HTTP DELETE method and returns a non-streaming [Response].
   Future<Response> delete(
     Uri url, {
     Map<String, String>? headers,
@@ -520,7 +536,7 @@ class MorphemeHttp {
         await _middlewareResponseOption?.onResponse(response);
       }
 
-      _handleErrorResponse(response);
+      _handleErrorResponse(request, response);
       await _authTokenOption?.handleConditionAuthTokenOption(request, response);
 
       String buffer =
@@ -567,8 +583,7 @@ class MorphemeHttp {
           ));
     } on SocketException {
       throw morpheme_exception.NoInternetException();
-    } catch (e, stackTrace) {
-      _onErrorResponse?.call(e, stackTrace);
+    } catch (_, __) {
       rethrow;
     }
   }
@@ -719,8 +734,83 @@ class MorphemeHttp {
     return request;
   }
 
-  /// Sends an HTTP POST multipart request with the given headers, files and body to the given
+  /// Sends an HTTP multipart request with the given method, headers, files and body to the given
   /// URL.
+  ///
+  /// [url] is the URL to send the request to.
+  ///
+  /// [method] is the HTTP method to use (e.g. 'POST', 'PATCH').
+  ///
+  /// [files] sets the files of the multipart request. It a [Map<String, File>].
+  ///
+  /// [headers] sets the headers of the multipart request. It a [Map<String, String>].
+  ///
+  /// [body] sets the body of the multipart request. It a [Map<String, String>].
+  Future<Response> _multipart(
+    Uri url,
+    String method, {
+    Map<String, List<File>>? files,
+    Map<String, String>? headers,
+    Map<String, String>? body,
+  }) async {
+    try {
+      final newHeaders = await _putIfAbsentHeader(url, headers);
+
+      final request = await _getMultiPartRequest(url,
+          method: method, files: files, headers: newHeaders, body: body);
+      Response response = await _fetch(request, body, false);
+
+      // do refresh token if condition is true
+      if (await _refreshTokenOption?.condition(request, response) ?? false) {
+        response = await _doRefreshTokenThenRetry(request, response, body);
+      } else if (await _refreshTokenOption?.conditionReFetchWithoutRefreshToken
+              ?.call(request, response) ??
+          false) {
+        response = await _doReFetch(request, response, body, false);
+      }
+
+      if (await _middlewareResponseOption?.condition(request, response) ??
+          false) {
+        await _middlewareResponseOption?.onResponse(response);
+      }
+
+      _handleErrorResponse(request, response);
+      return response;
+    } on SocketException {
+      throw morpheme_exception.NoInternetException();
+    } catch (_, __) {
+      rethrow;
+    }
+  }
+
+  /// Sends an HTTP GET multipart request with the given method, headers, files and body to the given
+  /// URL.
+  ///
+  /// [url] is the URL to send the request to.
+  ///
+  /// [files] sets the files of the multipart request. It a [Map<String, File>].
+  ///
+  /// [headers] sets the headers of the multipart request. It a [Map<String, String>].
+  ///
+  /// [body] sets the body of the multipart request. It a [Map<String, String>].
+  Future<Response> getMultipart(
+    Uri url, {
+    Map<String, List<File>>? files,
+    Map<String, String>? headers,
+    Map<String, String>? body,
+  }) =>
+      _multipart(
+        url,
+        'GET',
+        files: files,
+        headers: headers,
+        body: body,
+      );
+
+  /// Sends an HTTP POST multipart request with the given method, headers, files and body to the given
+  /// URL.
+  ///
+  /// [url] is the URL to send the request to.
   ///
   /// [files] sets the files of the multipart request. It a [Map<String, File>].
   ///
@@ -732,40 +822,19 @@ class MorphemeHttp {
     Map<String, List<File>>? files,
     Map<String, String>? headers,
     Map<String, String>? body,
-  }) async {
-    try {
-      final newHeaders = await _putIfAbsentHeader(url, headers);
+  }) =>
+      _multipart(
+        url,
+        'POST',
+        files: files,
+        headers: headers,
+        body: body,
+      );
 
-      final request = await _getMultiPartRequest(url,
-          method: 'POST', files: files, headers: newHeaders, body: body);
-      Response response = await _fetch(request, body, false);
-
-      // do refresh token if condition is true
-      if (await _refreshTokenOption?.condition(request, response) ?? false) {
-        response = await _doRefreshTokenThenRetry(request, response, body);
-      } else if (await _refreshTokenOption?.conditionReFetchWithoutRefreshToken
-              ?.call(request, response) ??
-          false) {
-        response = await _doReFetch(request, response, body, false);
-      }
-
-      if (await _middlewareResponseOption?.condition(request, response) ??
-          false) {
-        await _middlewareResponseOption?.onResponse(response);
-      }
-
-      _handleErrorResponse(response);
-      return response;
-    } on SocketException {
-      throw morpheme_exception.NoInternetException();
-    } catch (e, stackTrace) {
-      _onErrorResponse?.call(e, stackTrace);
-      rethrow;
-    }
-  }
-
-  /// Sends an HTTP PATCH multipart request with the given headers, files and body to the given
+  /// Sends an HTTP PATCH multipart request with the given method, headers, files and body to the given
   /// URL.
+  ///
+  /// [url] is the URL to send the request to.
   ///
   /// [files] sets the files of the multipart request. It a [Map<String, File>].
   ///
@@ -777,37 +846,62 @@ class MorphemeHttp {
     Map<String, List<File>>? files,
     Map<String, String>? headers,
     Map<String, String>? body,
-  }) async {
-    try {
-      final newHeaders = await _putIfAbsentHeader(url, headers);
+  }) =>
+      _multipart(
+        url,
+        'PATCH',
+        files: files,
+        headers: headers,
+        body: body,
+      );
 
-      final request = await _getMultiPartRequest(url,
-          method: 'PATCH', files: files, headers: newHeaders, body: body);
-      Response response = await _fetch(request, body, false);
+  /// Sends an HTTP PUT multipart request with the given method, headers, files and body to the given
+  /// URL.
+  ///
+  /// [url] is the URL to send the request to.
+  ///
+  /// [files] sets the files of the multipart request. It a [Map<String, File>].
+  ///
+  /// [headers] sets the headers of the multipart request. It a [Map<String, String>].
+  ///
+  /// [body] sets the body of the multipart request. It a [Map<String, String>].
+  Future<Response> putMultipart(
+    Uri url, {
+    Map<String, List<File>>? files,
+    Map<String, String>? headers,
+    Map<String, String>? body,
+  }) =>
+      _multipart(
+        url,
+        'PUT',
+        files: files,
+        headers: headers,
+        body: body,
+      );
 
-      // do refresh token if condition is true
-      if (await _refreshTokenOption?.condition(request, response) ?? false) {
-        response = await _doRefreshTokenThenRetry(request, response, body);
-      } else if (await _refreshTokenOption?.conditionReFetchWithoutRefreshToken
-              ?.call(request, response) ??
-          false) {
-        response = await _doReFetch(request, response, body, false);
-      }
-
-      if (await _middlewareResponseOption?.condition(request, response) ??
-          false) {
-        await _middlewareResponseOption?.onResponse(response);
-      }
-
-      _handleErrorResponse(response);
-      return response;
-    } on SocketException {
-      throw morpheme_exception.NoInternetException();
-    } catch (e, stackTrace) {
-      _onErrorResponse?.call(e, stackTrace);
-      rethrow;
-    }
-  }
+  /// Sends an HTTP DELETE multipart request with the given method, headers, files and body to the given
+  /// URL.
+  ///
+  /// [url] is the URL to send the request to.
+  ///
+  /// [files] sets the files of the multipart request. It a [Map<String, File>].
+  ///
+  /// [headers] sets the headers of the multipart request. It a [Map<String, String>].
+  ///
+  /// [body] sets the body of the multipart request. It a [Map<String, String>].
+  Future<Response> deleteMultipart(
+    Uri url, {
+    Map<String, List<File>>? files,
+    Map<String, String>? headers,
+    Map<String, String>? body,
+  }) =>
+      _multipart(
+        url,
+        'DELETE',
+        files: files,
+        headers: headers,
+        body: body,
+      );
 
   /// Returns a copy of [request].
   Future<BaseRequest> _copyRequest(BaseRequest request) async {
@@ -842,6 +936,13 @@ class MorphemeHttp {
     return requestCopy;
   }
 
+  /// Downloads a file from the given [url] and returns a [Response].
+  /// The [url] should be a valid URI,
+  /// and the [headers] and [body] parameters are optional.
+  /// The [onProgress] callback is called with the number of bytes received and the total content length.
+  /// If the request fails, it will throw a [NoInternetException] if there is no internet connection,
+  /// or call the provided [onErrorResponse] callback with the error and stack trace.
+  /// If the request is successful, it will return a [Response] with the downloaded file data.
   Future<Response> download(
     Uri url, {
     Map<String, String>? headers,
@@ -884,14 +985,13 @@ class MorphemeHttp {
         await _middlewareResponseOption?.onResponse(response);
       }
 
-      _handleErrorResponse(response);
+      _handleErrorResponse(request, response);
 
       await _authTokenOption?.handleConditionAuthTokenOption(request, response);
       return response;
     } on SocketException {
       throw morpheme_exception.NoInternetException();
-    } catch (e, stackTrace) {
-      _onErrorResponse?.call(e, stackTrace);
+    } catch (_, __) {
       rethrow;
     }
   }
@@ -959,27 +1059,33 @@ class MorphemeHttp {
   /// Throw a [ClientException] if status code 400 - 499
   ///
   /// Throw a [RedirectionException] if status code 300 - 399
-  void _handleErrorResponse(Response response) {
+  void _handleErrorResponse(BaseRequest request, Response response) {
+    morpheme_exception.MorphemeException? exception;
     if (response.statusCode >= 500) {
-      throw morpheme_exception.ServerException(
+      exception = morpheme_exception.ServerException(
         statusCode: response.statusCode,
         jsonBody: response.body,
       );
     } else if (response.statusCode == 401) {
-      throw morpheme_exception.UnauthorizedException(
+      exception = morpheme_exception.UnauthorizedException(
         statusCode: response.statusCode,
         jsonBody: response.body,
       );
     } else if (response.statusCode >= 400) {
-      throw morpheme_exception.ClientException(
+      exception = morpheme_exception.ClientException(
         statusCode: response.statusCode,
         jsonBody: response.body,
       );
     } else if (response.statusCode >= 300) {
-      throw morpheme_exception.RedirectionException(
+      exception = morpheme_exception.RedirectionException(
         statusCode: response.statusCode,
         jsonBody: response.body,
       );
+    }
+
+    if (exception != null) {
+      _onErrorResponse?.call(request, response);
+      throw exception;
     }
   }
 

@@ -1,6 +1,10 @@
+## 4.0.0
+
+- feat(morpheme_http): enhance error handling by adding request context to error responses and refactor multipart methods for consistency
+
 ## 3.3.0
 
-- add SSE (Server-Sent Events) stream methods for HTTP methods GET, POST, PUT, PATCH, and DELETE (thanks to [yusupmdl](https://github.com/yusupmdl])
+- add SSE (Server-Sent Events) stream methods for HTTP methods GET, POST, PUT, PATCH, and DELETE (thanks to [yusupmdl](https://github.com/yusupmdl]))
 
 ## 3.2.1
 
