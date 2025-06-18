@@ -1,3 +1,7 @@
+## 4.0.1
+
+- feat(morpheme_http): expand HTTP exports to include BaseRequest, Request, MultipartRequest, and BaseResponse
+
 ## 4.0.0
 
 - feat(morpheme_http): enhance error handling by adding request context to error responses and refactor multipart methods for consistency

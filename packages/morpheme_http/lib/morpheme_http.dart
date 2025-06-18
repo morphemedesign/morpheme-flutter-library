@@ -11,4 +11,5 @@ export 'package:morpheme_http/src/utils/middleware_response_option.dart';
 export 'package:morpheme_http/src/utils/refresh_token_option.dart';
 export 'package:morpheme_inspector/morpheme_inspector.dart'
     show MorphemeInspector;
-export 'package:http/http.dart' show Response;
+export 'package:http/http.dart'
+    show BaseRequest, Request, MultipartRequest, BaseResponse, Response;
