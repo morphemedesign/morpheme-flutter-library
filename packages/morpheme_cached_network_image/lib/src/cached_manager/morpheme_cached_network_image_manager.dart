@@ -191,6 +191,14 @@ class MorphemeCachedNetworkImageManager {
     _box?.removeAll();
   }
 
+  /// This function clears expired images from the cache by removing those with a TTL less than the current time.
+  Future<void> clearExpiredImage() async {
+    await _openStore();
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final query = _box?.query(CachedModel_.ttl.lessThan(now)).build();
+    query?.remove();
+  }
+
   /// This function closes a box if it is open and sets it to null.
   Future<void> close() async {
     final isOpenStore = _store != null;

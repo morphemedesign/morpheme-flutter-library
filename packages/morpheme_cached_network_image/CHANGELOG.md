@@ -1,3 +1,7 @@
+## 3.2.0
+
+- feat(morpheme_cached_network_image): add clearExpiredImage method to remove expired images from cache
+
 ## 3.1.0
 
 - add fade transition (thanks to [AnasQasem](https://github.com/AnasQasem))

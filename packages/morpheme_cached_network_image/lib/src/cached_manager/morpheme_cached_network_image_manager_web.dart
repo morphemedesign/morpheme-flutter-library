@@ -173,6 +173,19 @@ class MorphemeCachedNetworkImageManager {
         .forEach(window.localStorage.remove);
   }
 
+  /// This function clears expired images from the cache by removing those with a TTL less than the current time.
+  Future<void> clearExpiredImage() async {
+    final now = DateTime.now().millisecondsSinceEpoch;
+    window.localStorage.keys
+        .where((key) => key.startsWith(_cachePrefix))
+        .forEach((key) {
+      final cachedData = jsonDecode(window.localStorage[key] ?? '{}');
+      if (cachedData['ttl'] < now) {
+        window.localStorage.remove(key);
+      }
+    });
+  }
+
   /// This function is a placeholder for closing resources, but no action is needed for web local storage.
   Future<void> close() async {
     // No specific close operation needed for web local storage.
