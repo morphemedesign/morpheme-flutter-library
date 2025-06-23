@@ -89,8 +89,7 @@ class MorphemeHttp {
   Completer<void>? _refreshCompleter;
 
   // Stores callbacks to execute after refresh
-  final List<Function> _pendingRequests =
-      []; 
+  final List<Function> _pendingRequests = [];
 
   /// Return new headers with given [url] and old [headers],
   /// include set authorization.
@@ -306,7 +305,6 @@ class MorphemeHttp {
 
             _pendingRequests.add(() async {
               try {
-                // Here we should use _directFetch to avoid looping back into _fetch
                 final newResponse =
                     await _fetch(await _copyRequest(request), body, true);
                 completer.complete(newResponse);
@@ -331,16 +329,16 @@ class MorphemeHttp {
             response = await _doReFetch(request, response, body);
           }
 
-          if (await _middlewareResponseOption?.condition(request, response) ??
-              false) {
-            await _middlewareResponseOption?.onResponse(response);
-          }
-
           return response;
         },
       );
 
-      _handleErrorResponse(request,response);
+      if (await _middlewareResponseOption?.condition(request, response) ??
+          false) {
+        await _middlewareResponseOption?.onResponse(response);
+      }
+
+      _handleErrorResponse(request, response);
 
       await _authTokenOption?.handleConditionAuthTokenOption(request, response);
       return response;
@@ -783,6 +781,7 @@ class MorphemeHttp {
 
       final request = await _getMultiPartRequest(url,
           method: method, files: files, headers: newHeaders, body: body);
+          
       Response response = await _fetch(request, body, false);
 
       // do refresh token if condition is true
@@ -1168,18 +1167,17 @@ class MorphemeHttp {
 
     try {
       await _sendRefreshToken(_refreshTokenOption!);
-      
-      _pendingRequests.clear();
+
+      // Refresh token successful, complete the completer
       _refreshCompleter?.complete();
-      _refreshCompleter = null;
       for (var retry in _pendingRequests) {
         retry();
       }
     } catch (e) {
       _refreshCompleter?.completeError(e);
-      _refreshCompleter = null;
       rethrow;
     } finally {
+      _pendingRequests.clear();
       _refreshCompleter = null;
     }
   }
