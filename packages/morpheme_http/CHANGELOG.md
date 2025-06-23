@@ -1,3 +1,7 @@
+## 4.1.0
+
+- feat(morpheme-http): improve refresh token handling (thanks to [pratamagumilar](https://github.com/pratamagumilar))
+
 ## 4.0.1
 
 - feat(morpheme_http): expand HTTP exports to include BaseRequest, Request, MultipartRequest, and BaseResponse
@@ -8,7 +12,7 @@
 
 ## 3.3.0
 
-- add SSE (Server-Sent Events) stream methods for HTTP methods GET, POST, PUT, PATCH, and DELETE (thanks to [yusupmdl](https://github.com/yusupmdl]))
+- add SSE (Server-Sent Events) stream methods for HTTP methods GET, POST, PUT, PATCH, and DELETE (thanks to [yusupmdl](https://github.com/yusupmdl))
 
 ## 3.2.1
 

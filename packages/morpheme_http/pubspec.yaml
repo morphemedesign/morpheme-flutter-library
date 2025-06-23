@@ -1,6 +1,6 @@
 name: morpheme_http
 description: Future-based library for making HTTP requests modified from http package.
-version: 4.0.1
+version: 4.1.0
 homepage: https://morpheme.design/
 repository: https://github.com/morphemedesign/morpheme-flutter-library/tree/main/packages/morpheme_http
 

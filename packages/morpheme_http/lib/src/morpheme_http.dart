@@ -86,6 +86,7 @@ class MorphemeHttp {
   /// The callback function to handle error responses.
   final CallbackErrorResponse? _onErrorResponse;
 
+  /// Completer used to handle refresh token requests.
   Completer<void>? _refreshCompleter;
 
   // Stores callbacks to execute after refresh
@@ -781,16 +782,37 @@ class MorphemeHttp {
 
       final request = await _getMultiPartRequest(url,
           method: method, files: files, headers: newHeaders, body: body);
-          
-      Response response = await _fetch(request, body, false);
 
-      // do refresh token if condition is true
-      if (await _refreshTokenOption?.condition(request, response) ?? false) {
-        response = await _doRefreshTokenThenRetry(request, response, body);
-      } else if (await _refreshTokenOption?.conditionReFetchWithoutRefreshToken
-              ?.call(request, response) ??
-          false) {
-        response = await _doReFetch(request, response, body, false);
+      Response response;
+
+      if (_refreshCompleter != null &&
+          _refreshCompleter?.isCompleted == false) {
+        // If refresh in progress, we wait, then retry manually
+        final completer = Completer<Response>();
+
+        _pendingRequests.add(() async {
+          try {
+            final newResponse =
+                await _fetch(await _copyRequest(request), body, false);
+            completer.complete(newResponse);
+          } catch (e) {
+            completer.completeError(e);
+          }
+        });
+
+        response = await completer.future;
+      } else {
+        response = await _fetch(request, body, false);
+
+        // do refresh token if condition is true
+        if (await _refreshTokenOption?.condition(request, response) ?? false) {
+          response = await _doRefreshTokenThenRetry(request, response, body);
+        } else if (await _refreshTokenOption
+                ?.conditionReFetchWithoutRefreshToken
+                ?.call(request, response) ??
+            false) {
+          response = await _doReFetch(request, response, body, false);
+        }
       }
 
       if (await _middlewareResponseOption?.condition(request, response) ??
@@ -1156,6 +1178,7 @@ class MorphemeHttp {
     }
   }
 
+  /// Handles the refresh token logic.
   Future<void> _handleRefreshToken() async {
     if (_refreshCompleter != null) {
       // A refresh is already in progress, wait for it to complete
