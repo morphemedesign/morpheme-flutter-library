@@ -86,6 +86,12 @@ class MorphemeHttp {
   /// The callback function to handle error responses.
   final CallbackErrorResponse? _onErrorResponse;
 
+  Completer<void>? _refreshCompleter;
+
+  // Stores callbacks to execute after refresh
+  final List<Function> _pendingRequests =
+      []; 
+
   /// Return new headers with given [url] and old [headers],
   /// include set authorization.
   Future<Map<String, String>?> _putIfAbsentHeader(
@@ -293,6 +299,25 @@ class MorphemeHttp {
             method: method, url: url, headers: newHeaders, body: body),
         storage: _storage,
         fetch: () async {
+          if (_refreshCompleter != null &&
+              _refreshCompleter?.isCompleted == false) {
+            // If refresh in progress, we wait, then retry manually
+            final completer = Completer<Response>();
+
+            _pendingRequests.add(() async {
+              try {
+                // Here we should use _directFetch to avoid looping back into _fetch
+                final newResponse =
+                    await _fetch(await _copyRequest(request), body, true);
+                completer.complete(newResponse);
+              } catch (e) {
+                completer.completeError(e);
+              }
+            });
+
+            return completer.future;
+          }
+
           Response response = await _fetch(request, body);
 
           // do refresh token if condition is true
@@ -315,7 +340,7 @@ class MorphemeHttp {
         },
       );
 
-      _handleErrorResponse(request, response);
+      _handleErrorResponse(request,response);
 
       await _authTokenOption?.handleConditionAuthTokenOption(request, response);
       return response;
@@ -330,7 +355,7 @@ class MorphemeHttp {
   /// with given [reqeust], previous [response] and previous [body].
   Future<Response> _doRefreshTokenThenRetry(
       BaseRequest request, Response response, Object? body) async {
-    await _sendRefreshToken(_refreshTokenOption!);
+    await _handleRefreshToken();
 
     return _doReFetch(request, response, body);
   }
@@ -1129,6 +1154,33 @@ class MorphemeHttp {
       _logger.close();
     } catch (e) {
       if (kDebugMode) print(e.toString());
+    }
+  }
+
+  Future<void> _handleRefreshToken() async {
+    if (_refreshCompleter != null) {
+      // A refresh is already in progress, wait for it to complete
+      await _refreshCompleter!.future;
+      return;
+    }
+
+    _refreshCompleter = Completer<void>();
+
+    try {
+      await _sendRefreshToken(_refreshTokenOption!);
+      
+      _pendingRequests.clear();
+      _refreshCompleter?.complete();
+      _refreshCompleter = null;
+      for (var retry in _pendingRequests) {
+        retry();
+      }
+    } catch (e) {
+      _refreshCompleter?.completeError(e);
+      _refreshCompleter = null;
+      rethrow;
+    } finally {
+      _refreshCompleter = null;
     }
   }
 }
