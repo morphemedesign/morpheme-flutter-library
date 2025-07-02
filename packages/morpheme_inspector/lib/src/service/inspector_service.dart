@@ -45,26 +45,30 @@ abstract final class InspectorService {
   /// Insert data to sqlite with given [inspector].
   static Future<void> insert(Inspector inspector) async {
     await _validateDatabaseOpened();
-    await _db?.insert(
-      _table,
-      inspector.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await _db?.transaction((txn) async {
+      await txn.insert(
+        _table,
+        inspector.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    });
   }
 
   /// Update data to sqlite with given [inspector].
   static Future<void> updateResponse(
       String uuid, ResponseInspector response) async {
     await _validateDatabaseOpened();
-    await _db?.update(
-      _table,
-      {
-        _response: response.toJson(),
-        _updatedAt: DateTime.now().millisecondsSinceEpoch,
-      },
-      where: '$_id = ?',
-      whereArgs: [uuid],
-    );
+    await _db?.transaction((txn) async {
+      await txn.update(
+        _table,
+        {
+          _response: response.toJson(),
+          _updatedAt: DateTime.now().millisecondsSinceEpoch,
+        },
+        where: '$_id = ?',
+        whereArgs: [uuid],
+      );
+    });
   }
 
   /// Return list [Inspector] with given [limit] and [offset].
@@ -98,13 +102,17 @@ abstract final class InspectorService {
   /// Delete data sqlite with given [id].
   static Future<int?> delete(String id) async {
     await _validateDatabaseOpened();
-    return await _db?.delete(_table, where: '$_id = ?', whereArgs: [id]);
+    return _db?.transaction((txn) {
+      return txn.delete(_table, where: '$_id = ?', whereArgs: [id]);
+    });
   }
 
   /// Delete all data sqlite inspector.
   static Future<void> deleteAll() async {
     await _validateDatabaseOpened();
-    await _db?.delete(_table);
+    await _db?.transaction((txn) async {
+      await txn.delete(_table);
+    });
   }
 
   /// Close the database if databse stil open.

@@ -1,4 +1,8 @@
-## 2.0.1
+## 2.0.2
+
+- refactor(inspector_service): wrap database operations in transactions for improved reliability
+
+## 2.0.2
 
 - fix pagination list inspector
 
