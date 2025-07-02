@@ -1,3 +1,7 @@
+## 4.1.1
+
+- chore(morpheme_http): update morpheme_inspector dependency to version 2.0.2
+
 ## 4.1.0
 
 - feat(morpheme-http): improve refresh token handling (thanks to [pratamagumilar](https://github.com/pratamagumilar))
