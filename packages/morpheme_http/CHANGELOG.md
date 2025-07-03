@@ -1,3 +1,7 @@
+## 5.0.0
+
+- fix(morpheme_http): remove unused refresh token re-fetch condition and simplify request copying
+
 ## 4.1.1
 
 - chore(morpheme_http): update morpheme_inspector dependency to version 2.0.2

@@ -323,11 +323,6 @@ class MorphemeHttp {
           if (await _refreshTokenOption?.condition(request, response) ??
               false) {
             response = await _doRefreshTokenThenRetry(request, response, body);
-          } else if (await _refreshTokenOption
-                  ?.conditionReFetchWithoutRefreshToken
-                  ?.call(request, response) ??
-              false) {
-            response = await _doReFetch(request, response, body);
           }
 
           return response;
@@ -732,13 +727,13 @@ class MorphemeHttp {
     var request = MultipartRequest(method, url);
     final keys = files?.keys ?? [];
     for (var key in keys) {
-      for (var file in files?[key] ?? []) {
-        final path = file?.path ?? '';
+      for (var file in files?[key] ?? <File>[]) {
+        final path = file.path;
         final mimeType = lookupMimeType(path);
 
-        final multipartFile = await MultipartFile.fromPath(
+        final multipartFile = MultipartFile.fromBytes(
           key,
-          path,
+          file.readAsBytesSync(),
           contentType: mimeType == null ? null : MediaType.parse(mimeType),
         );
 
@@ -792,8 +787,8 @@ class MorphemeHttp {
 
         _pendingRequests.add(() async {
           try {
-            final newResponse =
-                await _fetch(await _copyRequest(request), body, false);
+            final newResponse = await _fetch(
+                await _copyRequest(request, files: files), body, false);
             completer.complete(newResponse);
           } catch (e) {
             completer.completeError(e);
@@ -807,11 +802,6 @@ class MorphemeHttp {
         // do refresh token if condition is true
         if (await _refreshTokenOption?.condition(request, response) ?? false) {
           response = await _doRefreshTokenThenRetry(request, response, body);
-        } else if (await _refreshTokenOption
-                ?.conditionReFetchWithoutRefreshToken
-                ?.call(request, response) ??
-            false) {
-          response = await _doReFetch(request, response, body, false);
         }
       }
 
@@ -950,7 +940,10 @@ class MorphemeHttp {
       );
 
   /// Returns a copy of [request].
-  Future<BaseRequest> _copyRequest(BaseRequest request) async {
+  Future<BaseRequest> _copyRequest(
+    BaseRequest request, {
+    Map<String, List<File>>? files,
+  }) async {
     BaseRequest requestCopy;
 
     if (request is Request) {
@@ -958,9 +951,25 @@ class MorphemeHttp {
         ..encoding = request.encoding
         ..bodyBytes = request.bodyBytes;
     } else if (request is MultipartRequest) {
-      requestCopy = MultipartRequest(request.method, request.url)
-        ..fields.addAll(request.fields)
-        ..files.addAll(request.files);
+      MultipartRequest multipartRequest =
+          MultipartRequest(request.method, request.url)
+            ..fields.addAll(request.fields);
+      final keys = files?.keys ?? [];
+      for (var key in keys) {
+        for (var file in files?[key] ?? <File>[]) {
+          final path = file.path;
+          final mimeType = lookupMimeType(path);
+
+          final multipartFile = MultipartFile.fromBytes(
+            key,
+            file.readAsBytesSync(),
+            contentType: mimeType == null ? null : MediaType.parse(mimeType),
+          );
+
+          multipartRequest.files.add(multipartFile);
+        }
+      }
+      requestCopy = multipartRequest;
     } else if (request is StreamedRequest) {
       throw Exception('copying streamed requests is not supported');
     } else {

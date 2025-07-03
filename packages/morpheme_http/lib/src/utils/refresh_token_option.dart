@@ -13,10 +13,6 @@ typedef RefreshTokenErrorResponse = Future<bool> Function(Response response);
 typedef ConditionRequireRefreshToken = Future<bool> Function(
     BaseRequest request, Response response);
 
-/// Re fetch condition without refresh token return [Future<bool>] from condition [BaseRequest] or [Response]
-typedef ConditionReFetchWithoutRefreshToken = Future<bool> Function(
-    BaseRequest request, Response response);
-
 /// Function async for get headers http call
 typedef GetHeaders = Future<Map<String, String>?> Function();
 
@@ -47,7 +43,6 @@ final class RefreshTokenOption {
     required this.condition,
     required this.onResponse,
     this.onErrorResponse,
-    this.conditionReFetchWithoutRefreshToken,
   });
 
   /// Method http call refresh token
@@ -77,10 +72,6 @@ final class RefreshTokenOption {
 
   /// Condition for trigger [RefreshTokenResponse]
   final ConditionRequireRefreshToken condition;
-
-  /// Condition for trigger re fetch without refresh token
-  final ConditionReFetchWithoutRefreshToken?
-      conditionReFetchWithoutRefreshToken;
 
   /// Callbak from [condition] is true
   final RefreshTokenResponse onResponse;
