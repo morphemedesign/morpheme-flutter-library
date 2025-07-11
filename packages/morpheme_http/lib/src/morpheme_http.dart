@@ -735,6 +735,7 @@ class MorphemeHttp {
           key,
           file.readAsBytesSync(),
           contentType: mimeType == null ? null : MediaType.parse(mimeType),
+          filename: file.path.split('/').last,
         );
 
         request.files.add(multipartFile);
@@ -964,6 +965,7 @@ class MorphemeHttp {
             key,
             file.readAsBytesSync(),
             contentType: mimeType == null ? null : MediaType.parse(mimeType),
+            filename: file.path.split('/').last,
           );
 
           multipartRequest.files.add(multipartFile);

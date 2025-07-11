@@ -1,3 +1,7 @@
+## 5.1.0
+
+- feat(morpheme_http): add filename to multipart file requests for better clarity
+
 ## 5.0.0
 
 - fix(morpheme_http): remove unused refresh token re-fetch condition and simplify request copying
