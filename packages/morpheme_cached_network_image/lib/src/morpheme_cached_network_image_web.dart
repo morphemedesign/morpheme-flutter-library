@@ -33,6 +33,8 @@ class MorphemeCachedNetworkImage extends StatefulWidget {
     this.isAntiAlias = false,
     this.cacheWidth,
     this.cacheHeight,
+    this.fadeTransition = true,
+    this.fadeTransitionDuration = const Duration(milliseconds: 300),
   });
 
   final String imageUrl;
@@ -332,6 +334,26 @@ class MorphemeCachedNetworkImage extends StatefulWidget {
   final int? cacheWidth;
   final int? cacheHeight;
 
+  /// Whether to apply a fade transition when the image is loaded.
+  ///
+  /// When set to true, the image will fade in smoothly once it's loaded from the network
+  /// or cache. This creates a more polished user experience by avoiding sudden image appearance.
+  /// If false, the image will appear immediately without any transition effect.
+  ///
+  /// Defaults to true.
+  final bool fadeTransition;
+
+  /// The duration of the fade transition animation when [fadeTransition] is true.
+  ///
+  /// This duration controls how long it takes for the image to fade in once it's loaded.
+  /// A longer duration will result in a slower, more gradual fade effect, while a shorter
+  /// duration will make the transition quicker.
+  ///
+  /// This parameter is only used when [fadeTransition] is true.
+  ///
+  /// Defaults to 300 milliseconds.
+  final Duration fadeTransitionDuration;
+
   @override
   State<MorphemeCachedNetworkImage> createState() =>
       _MorphemeCachedNetworkImageState();
@@ -377,6 +399,18 @@ class _MorphemeCachedNetworkImageState
 
   @override
   Widget build(BuildContext context) {
+    if (widget.fadeTransition) {
+      return AnimatedSwitcher(
+        transitionBuilder: (child, animation) =>
+            FadeTransition(opacity: animation, child: child),
+        duration: widget.fadeTransitionDuration,
+        child: _buildWidget(),
+      );
+    }
+    return _buildWidget();
+  }
+
+  Widget _buildWidget() {
     if (image == null && error != null) {
       return widget.errorBuilder?.call(context, error!, null) ??
           Container(

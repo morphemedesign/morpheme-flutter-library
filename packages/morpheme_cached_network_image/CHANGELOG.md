@@ -1,3 +1,7 @@
+## 3.3.0
+
+- chore(morpheme_cached_network_image): bump version to 3.3.0 and update dependencies; add fade transition feature for image loading
+
 ## 3.2.0
 
 - feat(morpheme_cached_network_image): add clearExpiredImage method to remove expired images from cache

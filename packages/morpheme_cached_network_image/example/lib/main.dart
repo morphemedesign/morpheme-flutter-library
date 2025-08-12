@@ -51,10 +51,11 @@ class _MyHomePageState extends State<MyHomePage> {
         children: [
           for (var i = 0; i < 1000; i++)
             MorphemeCachedNetworkImage(
-              imageUrl: 'https://picsum.photos/id/$i/1000/1000',
+              imageUrl: 'https://picsum.photos/id/$i/1000/2000',
               width: double.infinity,
               height: double.infinity,
               fit: BoxFit.cover,
+              fadeTransition: true,
             ),
         ],
       ),

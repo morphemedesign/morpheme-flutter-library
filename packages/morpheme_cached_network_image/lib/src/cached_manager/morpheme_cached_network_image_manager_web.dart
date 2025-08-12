@@ -3,6 +3,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
+// ignore: deprecated_member_use
 import 'dart:html';
 
 import 'package:http/http.dart' as http;

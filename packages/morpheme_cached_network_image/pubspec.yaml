@@ -1,6 +1,6 @@
 name: morpheme_cached_network_image
 description: Flutter library to load and cache network images. Can also be used with loading and error widgets.
-version: 3.2.0
+version: 3.3.0
 homepage: https://morpheme.design/
 repository: https://github.com/morphemedesign/morpheme-flutter-library/tree/main/packages/morpheme_cached_network_image
 
@@ -12,18 +12,18 @@ dependencies:
   flutter:
     sdk: flutter
 
-  http: ^1.2.2
+  http: ^1.5.0
   path_provider: ^2.1.5
   flat_buffers: ^23.5.26
-  objectbox: ^4.0.3
-  objectbox_flutter_libs: ^4.0.3
+  objectbox: ^4.3.0
+  objectbox_flutter_libs: ^4.3.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
   build_runner: ^2.4.13
-  objectbox_generator: ^4.0.3
+  objectbox_generator: ^4.3.0
 
 objectbox:
   output_dir: src/model
