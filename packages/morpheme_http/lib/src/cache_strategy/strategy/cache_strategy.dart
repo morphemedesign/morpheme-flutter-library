@@ -47,10 +47,10 @@ abstract class CacheStrategy extends Equatable {
   /// Args:
   ///   key (String): The key to store the data under.
   ///   storage (Storage): The storage to use.
-  ///   fetch (Future<Response> Function()): The function that will be called to fetch the data.
+  ///   fetch (Future&ltResponse&gt Function()): The function that will be called to fetch the data.
   ///
   /// Returns:
-  ///   A Future<Response>
+  ///   A Future&ltResponse&gt
   Future<Response> invokeAsync({
     required String key,
     required Storage storage,
@@ -75,7 +75,7 @@ abstract class CacheStrategy extends Equatable {
   ///   ttlValue (Duration): The time to live value for the cache. Defaults to defaultTTLValue
   ///
   /// Returns:
-  ///   A Future<Response?>
+  ///   A Future&ltResponse?&gt
   Future<Response?> invokeCache({
     required String key,
     required Storage storage,

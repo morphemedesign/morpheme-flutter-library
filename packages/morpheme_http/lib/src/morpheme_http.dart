@@ -507,7 +507,7 @@ class MorphemeHttp {
   /// Args:
   ///   - [method] (String): The HTTP method to use for the request (e.g., 'GET', 'POST').
   ///   - [url] (Uri): The URL to send the request to.
-  ///   - [headers] (Map<String, String>?): Optional headers to include in the request.
+  ///   - [headers] (Map&ltString, String&gt?): Optional headers to include in the request.
   ///   - [splitBuffer] (String): The string used to split the buffer into separate events.
   ///   - [splitEvent] (String): The string used to split each event into lines.
   ///   - [dataStartWith] (String): The string that indicates the start of the data in each line.
@@ -611,11 +611,11 @@ class MorphemeHttp {
   /// and returns a stream of [String].
   /// Args:
   /// - [url] (Uri): The URL to send the request to.
-  /// - [headers] (Map<String, String>?): Optional headers to include in the request.
-  /// - [body] (Map<String, dynamic>?): The body of the request, which can be a Map of query parameters.
+  /// - [headers] (Map&ltString, String&gt?): Optional headers to include in the request.
+  /// - [body] (Map&ltString, dynamic&gt?): The body of the request, which can be a Map of query parameters.
   /// - [encoding] (Encoding?): The encoding to use for the request body.
   /// Returns:
-  /// A [Stream<String>] that emits the data from each event as a string.
+  /// A [Stream&ltString&gt] that emits the data from each event as a string.
   /// If the request fails, it will throw a [NoInternetException] if there is no internet connection,
   /// or call the provided [onErrorResponse] callback with the error and stack trace.
   /// If the request is successful, it will yield the data from each event as a string.
@@ -640,11 +640,11 @@ class MorphemeHttp {
   /// and returns a stream of [String].
   /// Args:
   /// - [url] (Uri): The URL to send the request to.
-  /// - [headers] (Map<String, String>?): Optional headers to include in the request.
+  /// - [headers] (Map&ltString, String&gt?): Optional headers to include in the request.
   /// - [body] (Object?): The body of the request, which can be a String, List, or Map.
   /// - [encoding] (Encoding?): The encoding to use for the request body.
   /// Returns:
-  /// A [Stream<String>] that emits the data from each event as a string.
+  /// A [Stream&ltString&gt] that emits the data from each event as a string.
   /// If the request fails, it will throw a [NoInternetException] if there is no internet connection,
   /// or call the provided [onErrorResponse] callback with the error and stack trace.
   /// If the request is successful, it will yield the data from each event as a string.
@@ -660,11 +660,11 @@ class MorphemeHttp {
   /// and returns a stream of [String].
   /// Args:
   /// - [url] (Uri): The URL to send the request to.
-  /// - [headers] (Map<String, String>?): Optional headers to include in the request.
+  /// - [headers] (Map&ltString, String&gt?): Optional headers to include in the request.
   /// - [body] (Object?): The body of the request, which can be a String, List, or Map.
   /// - [encoding] (Encoding?): The encoding to use for the request body.
   /// Returns:
-  /// A [Stream<String>] that emits the data from each event as a string.
+  /// A [Stream&ltString&gt] that emits the data from each event as a string.
   /// If the request fails, it will throw a [NoInternetException] if there is no internet connection,
   /// or call the provided [onErrorResponse] callback with the error and stack trace.
   /// If the request is successful, it will yield the data from each event as a string.
@@ -680,11 +680,11 @@ class MorphemeHttp {
   /// and returns a stream of [String].
   /// Args:
   /// - [url] (Uri): The URL to send the request to.
-  /// - [headers] (Map<String, String>?): Optional headers to include in the request.
+  /// - [headers] (Map&ltString, String&gt?): Optional headers to include in the request.
   /// - [body] (Object?): The body of the request, which can be a String, List, or Map.
   /// - [encoding] (Encoding?): The encoding to use for the request body.
   /// Returns:
-  /// A [Stream<String>] that emits the data from each event as a string.
+  /// A [Stream&ltString&gt] that emits the data from each event as a string.
   /// If the request fails, it will throw a [NoInternetException] if there is no internet connection,
   /// or call the provided [onErrorResponse] callback with the error and stack trace.
   /// If the request is successful, it will yield the data from each event as a string.
@@ -700,11 +700,11 @@ class MorphemeHttp {
   /// and returns a stream of [String].
   /// Args:
   /// - [url] (Uri): The URL to send the request to.
-  /// - [headers] (Map<String, String>?): Optional headers to include in the request.
+  /// - [headers] (Map&ltString, String&gt?): Optional headers to include in the request.
   /// - [body] (Object?): The body of the request, which can be a String, List, or Map.
   /// - [encoding] (Encoding?): The encoding to use for the request body.
   /// Returns:
-  /// A [Stream<String>] that emits the data from each event as a string.
+  /// A [Stream&ltString&gt] that emits the data from each event as a string.
   /// If the request fails, it will throw a [NoInternetException] if there is no internet connection,
   /// or call the provided [onErrorResponse] callback with the error and stack trace.
   /// If the request is successful, it will yield the data from each event as a string.

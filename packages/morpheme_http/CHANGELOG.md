@@ -1,3 +1,9 @@
+## 6.0.0
+
+- chore(morpheme_http): bump version to 6.0.0 and update dependencies
+- chore: update morpheme_inspector to 3.0.0
+- feat: support minimal flutter 3.32
+
 ## 5.1.0
 
 - feat(morpheme_http): add filename to multipart file requests for better clarity
