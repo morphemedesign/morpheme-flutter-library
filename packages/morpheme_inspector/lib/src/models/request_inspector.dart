@@ -29,7 +29,7 @@ final class RequestInspector {
   /// The date time when instance created.
   final DateTime? dateTime;
 
-  /// Return to Map<String, dynamic> from [RequestInspector] data class.
+  /// Return to Map&ltString, dynamic&gt from [RequestInspector] data class.
   Map<String, dynamic> toMap() {
     return {
       'url': url.toString(),
@@ -42,7 +42,7 @@ final class RequestInspector {
     };
   }
 
-  /// Return to [RequestInspector] from  Map<String, dynamic>.
+  /// Return to [RequestInspector] from  Map&ltString, dynamic&gt.
   factory RequestInspector.fromMap(Map<String, dynamic> map) {
     return RequestInspector(
       url: Uri.parse(map['url']),

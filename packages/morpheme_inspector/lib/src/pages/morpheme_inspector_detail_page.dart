@@ -42,9 +42,11 @@ class MorphemeInspectorDetailPage extends StatelessWidget {
                   final rect = box != null
                       ? box.localToGlobal(Offset.zero) & box.size
                       : null;
-                  await Share.share(
-                    inspector.toMessageShare(),
-                    sharePositionOrigin: rect,
+                  await SharePlus.instance.share(
+                    ShareParams(
+                      text: inspector.toMessageShare(),
+                      sharePositionOrigin: rect,
+                    ),
                   );
                 },
                 icon: const Icon(Icons.share),

@@ -28,7 +28,7 @@ final class Inspector {
   /// The datetime updated of inspector.
   final DateTime? updatedAt;
 
-  /// Return to Map<String, dynamic> from [Inspector] data class.
+  /// Return to Map&ltString, dynamic&gt from [Inspector] data class.
   Map<String, dynamic> toMap() {
     return {
       'id': uuid,
@@ -39,7 +39,7 @@ final class Inspector {
     };
   }
 
-  /// Return to [Inspector] from  Map<String, dynamic>.
+  /// Return to [Inspector] from  Map&ltString, dynamic&gt.
   factory Inspector.fromMap(Map<String, dynamic> map) {
     return Inspector(
       uuid: map['id'] ?? '',

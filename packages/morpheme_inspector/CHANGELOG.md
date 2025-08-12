@@ -1,3 +1,8 @@
+## 3.0.0
+
+- chore(morpheme_inspector): bump version to 3.0.0 and update dependencies
+- feat: support minimal flutter 3.32
+
 ## 2.0.2
 
 - refactor(inspector_service): wrap database operations in transactions for improved reliability

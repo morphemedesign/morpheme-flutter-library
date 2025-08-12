@@ -29,7 +29,7 @@ final class ResponseInspector {
   /// Flag instance is timeout.
   final bool? isTimeout;
 
-  /// Return to Map<String, dynamic> from [ResponseInspector] data class.
+  /// Return to Map&ltString, dynamic&gt from [ResponseInspector] data class.
   Map<String, dynamic> toMap() {
     return {
       'status': status,
@@ -42,7 +42,7 @@ final class ResponseInspector {
     };
   }
 
-  /// Return to [ResponseInspector] from  Map<String, dynamic>.
+  /// Return to [ResponseInspector] from  Map&ltString, dynamic&gt.
   factory ResponseInspector.fromMap(Map<String, dynamic> map) {
     return ResponseInspector(
       status: map['status']?.toInt(),

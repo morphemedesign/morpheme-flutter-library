@@ -31,8 +31,12 @@ abstract final class InspectorService {
 
     return await openDatabase(path, version: 1,
         onCreate: (Database db, int version) async {
-      await db.execute(
-          'CREATE TABLE $_table ($_id TEXT PRIMARY KEY, $_request TEXT, $_response TEXT, $_createdAt INTEGER, $_updatedAt INTEGER)');
+      await db.transaction(
+        (txn) async {
+          await txn.execute(
+              'CREATE TABLE $_table ($_id TEXT PRIMARY KEY, $_request TEXT, $_response TEXT, $_createdAt INTEGER, $_updatedAt INTEGER)');
+        },
+      );
     });
   }
 
@@ -78,24 +82,36 @@ abstract final class InspectorService {
     int? offset,
   }) async {
     await _validateDatabaseOpened();
-    final listMap = await _db?.query(
+    final listMap = await _db?.transaction(
+      (txn) async {
+        return txn.query(
           _table,
           where: keyword != null ? '$_request LIKE ?' : null,
           whereArgs: keyword != null ? ['%$keyword%'] : null,
           orderBy: '$_createdAt DESC',
           limit: limit,
           offset: offset,
-        ) ??
-        [];
-    return listMap.map((e) => Inspector.fromMap(e)).toList();
+        );
+      },
+    );
+    return listMap?.map((e) => Inspector.fromMap(e)).toList() ?? [];
   }
 
   /// Return [Inspector] with given [id].
   static Future<Inspector?> get(String id) async {
     await _validateDatabaseOpened();
-    final listMap =
-        await _db?.query(_table, where: '$_id = ?', whereArgs: [id]) ?? [];
-    if (listMap.isNotEmpty) return Inspector.fromMap(listMap.first);
+    final listMap = await _db?.transaction(
+      (txn) async {
+        return txn.query(
+          _table,
+          where: '$_id = ?',
+          whereArgs: [id],
+        );
+      },
+    );
+    if (listMap?.isNotEmpty ?? false) {
+      return Inspector.fromMap(listMap?.first ?? {});
+    }
     return null;
   }
 
