@@ -1,5 +1,3 @@
-library morpheme_extension;
-
 export 'package:time/time.dart';
 
 export 'src/double_extension.dart';
