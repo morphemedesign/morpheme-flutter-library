@@ -1,3 +1,7 @@
+## 1.1.0
+
+- chore(morpheme_cucumber): bump version to 1.1.0 and update dependencies
+
 ## 1.0.5
 
 - fix error jsonDecode with empty string
