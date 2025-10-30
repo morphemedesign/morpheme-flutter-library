@@ -1,3 +1,15 @@
+## 3.1.0
+
+feat(inspector): add curl command generation and display in UI
+
+- Implement generateCurlCommand method to produce curl representation of requests
+- Include curl command in the message share output for easier debugging
+- Display curl command in the overview section widget for quick inspection
+- Add a floating action button in example app to navigate to inspector page
+- Update example app dependencies and iOS deployment target to 13.0
+- Add ObjectBox package dependencies in iOS Podfile and Podfile.lock for data persistence
+- Update example app .gitignore to include .build and .swiftpm directories
+
 ## 3.0.0
 
 - chore(morpheme_inspector): bump version to 3.0.0 and update dependencies

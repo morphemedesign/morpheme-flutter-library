@@ -19,6 +19,11 @@ class OverviewSection extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       children: [
         TextItemInspector(
+          title: 'Curl',
+          value: inspector.generateCurlCommand(),
+        ),
+        const SizedBox(height: 8),
+        TextItemInspector(
           title: 'URL',
           value: Uri.decodeFull(inspector.request.url.toString()),
         ),

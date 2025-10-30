@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:morpheme_http/morpheme_http.dart';
+import 'package:morpheme_http/morpheme_http.dart' hide MorphemeInspector;
+import 'package:morpheme_inspector/morpheme_inspector.dart';
 
 final inspector = MorphemeInspector(
   notificationIcon: '@mipmap/ic_launcher',
@@ -56,6 +57,12 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: Text('Inspect'),
+        onPressed: () {
+          inspector.navigateToInspectorPage();
+        },
       ),
       body: Center(
         child: Column(

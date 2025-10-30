@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:morpheme_inspector/morpheme_inspector.dart';
 import 'package:morpheme_inspector/src/extensions/date_time_extensions.dart';
@@ -227,6 +228,7 @@ extension InspectorExtension on Inspector {
   String toMessageShare() {
     StringBuffer sb = StringBuffer('Morpheme Inspector\n\n');
     sb.writeln('========= Overview =========');
+    sb.writeln('Curl: ${generateCurlCommand()}');
     sb.writeln('URL: ${Uri.decodeFull(request.url.toString())}');
     sb.writeln('Method: ${request.method}');
     sb.writeln('Status: $status');
@@ -263,5 +265,31 @@ extension InspectorExtension on Inspector {
     sb.writeln('Body: ${prettyJson(response?.body, '-')}');
 
     return sb.toString();
+  }
+
+  /// Generate curl command for the request
+  String generateCurlCommand() {
+    final buffer =
+        StringBuffer('curl -X ${request.method} "${request.url.toString()}"');
+
+    // Add headers
+    if (request.headers != null) {
+      for (final entry in request.headers!.entries) {
+        buffer.write(' -H "${entry.key}: ${entry.value}"');
+      }
+    }
+
+    // Add body if present
+    if (request.body != null) {
+      if (request.body is String) {
+        buffer.write(' -d \'${request.body}\'');
+      } else if (request.body is Map) {
+        buffer.write(' -d \'${json.encode(request.body)}\'');
+      } else {
+        buffer.write(' -d \'${request.body.toString()}\'');
+      }
+    }
+
+    return buffer.toString();
   }
 }
