@@ -1,3 +1,10 @@
+## 6.1.0
+
+chore(morpheme_http): bump version and update morpheme_inspector dependency
+
+- Change package version from 6.0.0 to 6.1.0
+- Update morpheme_inspector dependency from ^3.0.0 to ^3.1.0
+
 ## 6.0.0
 
 - chore(morpheme_http): bump version to 6.0.0 and update dependencies
